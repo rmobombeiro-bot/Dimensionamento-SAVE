@@ -1,0 +1,1539 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AR INSTALAÇÕES</title>
+<style>
+:root{--bg:#071222;--panel:#0b192b;--panel-2:#0e2033;--line:#20344d;--line-soft:rgba(120,155,190,.12);--text:#d8e1ed;--muted:#91a1b5;--muted-2:#667991;--green:#29d3a5;--green-soft:rgba(41,211,165,.1);--green-hover:#35e2b3;--danger:#ef5350;--danger-soft:rgba(239,83,80,.12);--warn:#f5b942;--warn-soft:rgba(245,185,66,.1);--radius:17px;--radius-sm:10px}
+*{box-sizing:border-box}
+body{min-height:100vh;margin:0;color:var(--text);background:radial-gradient(ellipse at 50% -15%,rgba(23,71,91,.25),transparent 58%),linear-gradient(135deg,#050d19,var(--bg) 48%,#091526);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+button{font:inherit;cursor:pointer}input,select,textarea{font:inherit;color:inherit}
+.topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;height:60px;padding:0 12px;border-bottom:1px solid var(--line-soft);background:rgba(5,13,25,.96)}
+.brand-symbol{display:grid;place-items:center;width:34px;height:34px;color:var(--green);border:1px solid rgba(41,211,165,.4);border-radius:11px;background:var(--green-soft);font-weight:900}
+.menu-button{display:grid;place-items:center;width:38px;height:38px;border:1px solid var(--line);border-radius:11px;color:var(--text);background:var(--panel)}
+.brand-title{font-size:13px;font-weight:750}.brand-caption{margin-top:2px;color:var(--muted);font-size:9px;text-transform:uppercase}
+.spacer{flex:1}.topbar-btn{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid var(--line);border-radius:9px;color:var(--muted);background:var(--panel)}
+.layout{display:flex;min-height:calc(100vh - 60px)}
+.sidebar{position:fixed;top:60px;bottom:0;left:0;z-index:30;width:250px;padding:18px 12px;border-right:1px solid var(--line);background:rgba(7,18,34,.98);transition:transform .22s ease}
+.sidebar.collapsed{transform:translateX(-105%)}
+.nav-item{display:flex;align-items:center;gap:12px;width:100%;min-height:44px;margin:3px 0;padding:10px 12px;border:1px solid transparent;border-radius:10px;color:var(--muted);background:transparent;font-size:13px;font-weight:650}
+.nav-item.active{color:var(--green);border-color:rgba(41,211,165,.18);background:var(--green-soft)}
+.nav-icon{display:inline-grid;place-items:center;width:21px}
+main{flex:1;min-width:0;padding:22px 14px 40px}
+.content{width:100%;max-width:980px;margin:0 auto}
+.page{display:none}.page.active{display:block}
+.step-heading{display:flex;justify-content:space-between;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.eyebrow{margin-bottom:8px;color:var(--green);font:800 11px monospace;letter-spacing:.24em;text-transform:uppercase}
+.step-count{padding-top:3px;color:#8392a7;font:12px monospace}
+h1{margin:0;font-size:clamp(20px,5vw,28px);font-weight:450}
+h2{margin:0;font-size:16px;font-weight:650}h3{margin:0 0 10px;font-size:14px}
+.toolbar{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.search-wrap{position:relative;flex:1;min-width:200px}
+.search-input{width:100%;height:44px;padding:0 14px 0 40px;border:1px solid var(--line);border-radius:10px;color:var(--text);background:var(--panel-2);font-size:14px;outline:none}
+.search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted-2);pointer-events:none}
+.search-dropdown{position:absolute;top:calc(100% + 6px);left:0;right:0;max-height:280px;overflow-y:auto;border:1px solid var(--line);border-radius:10px;background:var(--panel-2);z-index:15;display:none}
+.search-dropdown.open{display:block}
+.search-item{width:100%;padding:12px 14px;border:0;border-bottom:1px solid rgba(120,155,190,.08);color:var(--text);background:transparent;text-align:left;font-size:13px}
+.search-empty{padding:14px;color:var(--muted);font-size:12px;text-align:center}
+.btn-add{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px;border:1px solid rgba(41,211,165,.48);border-radius:10px;color:#04140f;background:var(--green);font-size:13px;font-weight:800}
+.list{display:grid;gap:10px}
+.list-card{display:flex;gap:12px;padding:14px 16px;border:1px solid var(--line);border-radius:10px;background:linear-gradient(135deg,rgba(16,37,58,.7),rgba(9,23,40,.8))}
+.list-card[data-clickable="true"]:hover{border-color:rgba(41,211,165,.4);cursor:pointer}
+.list-card-main{flex:1;min-width:0}
+.list-card-title{font-size:14px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.list-card-sub{margin-top:3px;color:var(--muted);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.list-card-tags{margin-top:6px;display:flex;gap:5px;flex-wrap:wrap}
+.tag{display:inline-block;padding:2px 7px;border-radius:5px;font-size:9.5px;font-weight:700;text-transform:uppercase}
+.tag.ocpp{color:var(--green);background:var(--green-soft);border:1px solid rgba(41,211,165,.35)}
+.tag.fase{color:#8bb8ff;background:rgba(139,184,255,.1);border:1px solid rgba(139,184,255,.35)}
+.tag.tensao{color:var(--warn);background:var(--warn-soft);border:1px solid rgba(245,185,66,.35)}
+.tag.cc{color:#c792ea;background:rgba(199,146,234,.1);border:1px solid rgba(199,146,234,.35)}
+.tag.nocc{color:#ff8b8b;background:rgba(255,139,139,.1);border:1px solid rgba(255,139,139,.35)}
+.tag.smart{color:#6ee7ff;background:rgba(110,231,255,.1);border:1px solid rgba(110,231,255,.35)}
+.list-card-actions{display:flex;gap:6px}
+.icon-btn{display:grid;place-items:center;width:36px;height:36px;border:1px solid var(--line);border-radius:8px;color:var(--muted);background:var(--panel);font-size:14px}
+.icon-btn.danger:hover{color:var(--danger);border-color:rgba(239,83,80,.5)}
+.empty-state{padding:38px 20px;border:1px dashed var(--line);border-radius:var(--radius);text-align:center;background:rgba(11,25,43,.4)}
+.empty-icon{font-size:28px;color:var(--muted-2);margin-bottom:8px}
+.empty-title{color:var(--text);font-size:14px;font-weight:650}
+.empty-text{margin-top:5px;color:var(--muted);font-size:12px}
+.section-panel{margin-top:16px;padding:18px;border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(135deg,var(--panel-2),var(--panel))}
+.section-panel p{color:var(--muted);font-size:13px;line-height:1.65}
+.primary-button{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:10px 16px;border:1px solid rgba(41,211,165,.48);border-radius:10px;color:#04140f;background:var(--green);font-size:13px;font-weight:800}
+.primary-button:hover{background:var(--green-hover)}
+.btn-secondary{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:10px 16px;border:1px solid var(--line);border-radius:10px;color:var(--text);background:transparent;font-size:13px;font-weight:700}
+.btn-warn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:10px 16px;border:1px solid rgba(245,185,66,.4);border-radius:10px;color:var(--warn);background:var(--warn-soft);font-size:13px;font-weight:700}
+.btn-danger{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:10px 16px;border:1px solid rgba(239,83,80,.4);border-radius:10px;color:var(--danger);background:var(--danger-soft);font-size:13px;font-weight:700}
+.bottom-actions{display:flex;justify-content:space-between;gap:10px;margin-top:18px;flex-wrap:wrap}
+.stepper{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:22px;padding:5px;border:1px solid var(--line);border-radius:12px;background:rgba(11,25,43,.5)}
+.stepper-item{flex:1;min-width:60px;padding:7px 4px;border:0;border-radius:8px;color:var(--muted);background:transparent;text-align:center;font-size:10px;font-weight:650}
+.stepper-item.done{color:var(--green)}
+.stepper-item.active{color:#04140f;background:var(--green)}
+.result-grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-top:14px}
+.result-item{padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:rgba(7,18,34,.55)}
+.result-label{color:var(--muted);font-size:10px;font-weight:650;text-transform:uppercase}
+.result-value{margin-top:5px;font-size:16px;font-weight:600;word-break:break-word}
+.result-value.highlight{color:var(--green)}
+.aviso{display:flex;gap:10px;align-items:flex-start;margin-top:14px;padding:12px 14px;border:1px solid rgba(245,185,66,.25);border-radius:11px;color:#dfc38a;background:var(--warn-soft);font-size:12px}
+.overlay{display:none}.overlay.open{display:block;position:fixed;inset:60px 0 0;z-index:25;background:rgba(1,7,15,.64)}
+.modal-backdrop{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:14px;background:rgba(1,7,15,.75);overflow-y:auto}
+.modal-backdrop.open{display:flex}
+.modal{width:100%;max-width:640px;margin:auto;border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(135deg,var(--panel-2),var(--panel));max-height:calc(100vh - 28px);display:flex;flex-direction:column}
+.modal.large{max-width:900px}
+.modal-header{display:flex;justify-content:space-between;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line-soft)}
+.modal-close{display:grid;place-items:center;width:34px;height:34px;border:1px solid var(--line);border-radius:8px;color:var(--muted);background:var(--panel)}
+.modal-body{padding:16px 18px;overflow-y:auto}
+.modal-footer{display:flex;justify-content:flex-end;gap:10px;padding:14px 18px;border-top:1px solid var(--line-soft);flex-wrap:wrap}
+.form-grid{display:grid;gap:12px;grid-template-columns:1fr}
+.form-field{display:flex;flex-direction:column;gap:5px}
+.form-field.full{grid-column:1/-1}
+.form-label{color:var(--muted);font-size:11px;font-weight:650;text-transform:uppercase}
+.form-label .req{color:var(--green)}
+.form-input,.form-select,.form-textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:9px;color:var(--text);background:rgba(7,18,34,.6);font-size:14px;outline:none}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:rgba(41,211,165,.55)}
+.form-input:disabled,.form-select:disabled{cursor:not-allowed;background:rgba(7,18,34,.35);opacity:1}
+.form-textarea{resize:vertical;min-height:70px}
+.form-select{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path fill='%2391a1b5' d='M6 8L2 4h8z'/></svg>");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+.toast-wrap{position:fixed;bottom:14px;left:14px;right:14px;z-index:200;display:flex;flex-direction:column;gap:8px;pointer-events:none;align-items:center}
+.toast{padding:11px 14px;border:1px solid var(--line);border-left:3px solid var(--green);border-radius:10px;background:var(--panel-2);font-size:12.5px;pointer-events:auto;max-width:100%}
+.toast.danger{border-left-color:var(--danger)}.toast.warn{border-left-color:var(--warn)}
+.mt-8{margin-top:8px}.mt-16{margin-top:16px}.mt-20{margin-top:20px}
+.muted{color:var(--muted);font-size:12px}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.aviso-visual{display:flex;gap:10px;align-items:flex-start;margin-top:8px;padding:10px 12px;border:1px solid rgba(41,211,165,.25);border-radius:10px;color:#8fdfc6;background:rgba(41,211,165,.05);font-size:11.5px;line-height:1.5}
+.aviso-visual.warn{border-color:rgba(245,185,66,.35);color:#dfc38a;background:var(--warn-soft)}
+.aviso-visual.danger{border-color:rgba(239,83,80,.35);color:#f0b0af;background:var(--danger-soft)}
+.pot-tensao-table{width:100%;border-collapse:collapse;margin:8px 0;font-size:12px}
+.pot-tensao-table th,.pot-tensao-table td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line-soft)}
+.pot-tensao-table th{color:var(--muted);font-weight:650;font-size:10px;text-transform:uppercase}
+.pot-tensao-row{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+.pot-tensao-row select,.pot-tensao-row input{flex:1;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:rgba(7,18,34,.6);color:var(--text);font-size:13px}
+.pot-tensao-row button{flex:0 0 auto;width:36px;height:36px;border:1px solid rgba(239,83,80,.4);border-radius:8px;color:var(--danger);background:var(--danger-soft);font-size:14px;cursor:pointer}
+.report-preview{margin-top:18px;padding:20px;border:1px solid var(--line);border-radius:var(--radius);background:rgba(11,25,43,.4);font-family:Georgia,serif}
+.report-preview h1{font-size:18px;font-weight:700;margin:0 0 6px}
+.report-preview h2{font-size:13px;font-weight:700;text-transform:uppercase;color:var(--green);margin:20px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--line)}
+.report-preview table{width:100%;border-collapse:collapse;margin:8px 0;font-size:12px}
+.report-preview th,.report-preview td{padding:7px 8px;text-align:left;border-bottom:1px solid var(--line-soft);vertical-align:top}
+.report-preview th{color:var(--muted);font-weight:650;font-size:10px;text-transform:uppercase;width:38%}
+.report-preview td strong{color:var(--green)}
+.report-preview .footer-note{margin-top:22px;padding-top:12px;border-top:1px solid var(--line-soft);color:var(--muted-2);font-size:10.5px}
+.confirm-backdrop{position:fixed;inset:0;z-index:300;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(1,7,15,.82)}
+.confirm-backdrop.open{display:flex}
+.confirm-box{width:100%;max-width:400px;border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(135deg,var(--panel-2),var(--panel));overflow:hidden}
+.confirm-header{display:flex;align-items:center;gap:12px;padding:18px 20px 0}
+.confirm-icon{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;font-size:19px}
+.confirm-icon.info{background:var(--green-soft);color:var(--green);border:1px solid rgba(41,211,165,.4)}
+.confirm-icon.danger{background:var(--danger-soft);color:var(--danger);border:1px solid rgba(239,83,80,.4)}
+.confirm-icon.warn{background:var(--warn-soft);color:var(--warn);border:1px solid rgba(245,185,66,.4)}
+.confirm-title{font-size:15px;font-weight:700}
+.confirm-message{padding:12px 20px 18px;color:var(--muted);font-size:13px;line-height:1.55}
+.confirm-footer{display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--line-soft);background:rgba(7,18,34,.3);flex-wrap:wrap}
+.confirm-footer button{flex:1;min-width:100px}
+.carr-etapa2-item{display:flex;justify-content:space-between;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:rgba(7,18,34,.55);margin-bottom:8px}
+.carr-etapa2-item .info{flex:1;min-width:0}
+.carr-etapa2-item .name{font-size:13.5px;font-weight:650}
+.carr-etapa2-item .meta{margin-top:3px;font-size:11px;color:var(--muted)}
+.carr-etapa2-item .tags{margin-top:6px;display:flex;gap:5px;flex-wrap:wrap}
+.circuito-resumo{padding:14px 16px;border:1px solid var(--line);border-radius:10px;background:rgba(7,18,34,.55);margin-bottom:8px;display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.circuito-resumo .notacao{color:var(--green);font:700 13px "SFMono-Regular",Consolas,monospace;letter-spacing:.04em}
+.circuito-resumo .meta{font-size:11px;color:var(--muted);margin-top:4px}
+.carr-btn-grid{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));margin-top:14px}
+.carr-btn{padding:14px 16px;border:1px solid var(--line);border-radius:10px;background:linear-gradient(135deg,rgba(16,37,58,.7),rgba(9,23,40,.8));color:var(--text);text-align:left;cursor:pointer;transition:border-color .18s,transform .18s}
+.carr-btn:hover{border-color:rgba(41,211,165,.5);transform:translateY(-1px)}
+.carr-btn.selected{border-color:var(--green);border-width:2px;box-shadow:0 0 0 4px rgba(41,211,165,.05)}
+.carr-btn .ct-name{font-size:13px;font-weight:650}
+.carr-btn .ct-meta{font-size:10.5px;color:var(--muted);margin-top:3px}
+.carr-btn .ct-badge{display:inline-block;padding:2px 7px;border-radius:5px;font-size:9px;font-weight:700;text-transform:uppercase;margin-top:6px}
+.carr-btn .ct-badge.ok{color:var(--green);background:var(--green-soft);border:1px solid rgba(41,211,165,.35)}
+.carr-btn .ct-badge.pending{color:var(--warn);background:var(--warn-soft);border:1px solid rgba(245,185,66,.35)}
+.trecho-list-header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.trecho-list-header .tl-title{color:var(--green);font:700 12px "SFMono-Regular",Consolas,monospace;letter-spacing:.1em;text-transform:uppercase}
+.report-preview .notacao-bloco{font-family:"SFMono-Regular",Consolas,monospace;background:rgba(7,18,34,.5);padding:8px 12px;border-radius:8px;color:var(--green);font-weight:700;display:inline-block;margin:4px 0;letter-spacing:.03em}
+
+/* ============ BLOCOS ADICIONAIS (v42) ============ */
+.check-item{display:flex;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:rgba(7,18,34,.55);margin-bottom:8px}
+.check-icon{flex:0 0 auto;display:grid;place-items:center;width:22px;height:22px;border-radius:50%;font-size:12px;font-weight:800}
+.check-icon.ok{background:var(--green-soft);color:var(--green);border:1px solid rgba(41,211,165,.4)}
+.check-icon.bad{background:var(--danger-soft);color:var(--danger);border:1px solid rgba(239,83,80,.4)}
+.check-icon.warn{background:var(--warn-soft);color:var(--warn);border:1px solid rgba(245,185,66,.4)}
+.check-text{flex:1;font-size:12.5px;line-height:1.5}
+.check-text .norma{color:var(--muted);font-size:11px}
+.trecho-card{padding:16px;margin-bottom:12px;border:1px solid var(--line);border-radius:10px;background:linear-gradient(135deg,rgba(16,37,58,.7),rgba(9,23,40,.8))}
+.trecho-header{display:flex;justify-content:space-between;gap:10px;margin-bottom:12px;align-items:center}
+.trecho-title{color:var(--green);font:700 11px monospace;text-transform:uppercase}
+.trecho-grid{display:grid;gap:10px;grid-template-columns:1fr}
+.calc-block{margin-top:20px;padding-top:14px;border-top:1px solid var(--line)}
+.calc-block-title{color:var(--green);font:700 12px monospace;text-transform:uppercase;margin-bottom:12px}
+.calc-step{display:flex;justify-content:space-between;gap:10px;padding:8px 12px;border-bottom:1px solid var(--line-soft);font-size:12.5px}
+.calc-step .lbl{color:var(--muted)}
+.calc-step .val{font-weight:600}
+.calc-step .val.highlight{color:var(--green)}
+.dim-item{padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:rgba(7,18,34,.55);margin-bottom:8px;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.dim-item .info{flex:1;min-width:0}
+.dim-item .name{font-size:13.5px;font-weight:650}
+.dim-item .meta{font-size:11px;color:var(--muted);margin-top:3px}
+.preview-panel{border:1px solid rgba(41,211,165,.35)!important;background:linear-gradient(135deg,rgba(41,211,165,.05),rgba(9,23,40,.85))!important}
+
+/* Aba Condutos — layout */
+#page-dimensionamento .dim-step[data-step="4"] .section-panel{padding:20px}
+#page-dimensionamento .dim-step[data-step="4"] #d_circuitoResumo{margin-top:16px}
+#page-dimensionamento .dim-step[data-step="4"] #d_cond_resultado{margin-top:22px;padding-top:18px;border-top:1px solid var(--line-soft)}
+#page-dimensionamento .dim-step[data-step="4"] .result-grid{margin-top:0}
+#d_cond_wrap_larg[hidden],#d_cond_wrap_alt[hidden],#d_cond_wrap_dn[hidden]{display:none !important}
+#d_cond_wrap_dn:not([hidden]){animation:fadeIn .2s ease}
+#d_cond_wrap_larg:not([hidden]),#d_cond_wrap_alt:not([hidden]){animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+
+@media(min-width:720px){
+  .topbar{height:68px;padding:0 24px}
+  .brand-title{font-size:14px}.brand-caption{font-size:10px}
+  .topbar-btn{width:auto;padding:0 13px;gap:7px;height:36px;font-size:11px;font-weight:650}
+  .sidebar{position:relative;top:0;bottom:auto;width:248px;flex:0 0 248px;padding:21px 13px;transition:width .22s ease,flex-basis .22s ease,padding .22s ease}
+  .sidebar.collapsed{transform:none;flex-basis:0;width:0;padding:0;border:0}
+  .layout{min-height:calc(100vh - 68px)}
+  main{padding:33px clamp(18px,4vw,54px) 50px}
+  .form-grid{grid-template-columns:1fr 1fr}
+  .modal-footer{flex-wrap:nowrap}
+  .toast-wrap{left:auto;right:20px;bottom:20px;align-items:flex-end;min-width:220px}
+  .confirm-footer button{flex:0 0 auto}
+  .trecho-grid{grid-template-columns:1fr 1fr 1fr}
+  #page-dimensionamento .dim-step[data-step="4"] .form-grid{grid-template-columns:1fr 1fr}
+}
+@media(min-width:1100px){.menu-button{display:none}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <button class="menu-button" id="menuButton" type="button">☰</button>
+  <div class="brand-symbol">⛽</div>
+  <div><div class="brand-title">AR INSTALAÇÕES</div><div class="brand-caption">ENGENHARIA E SEGURANÇA</div></div>
+  <div class="spacer"></div>
+  <button class="topbar-btn" id="btnExport" type="button" title="Exportar tudo">⤓</button>
+  <button class="topbar-btn" id="btnImport" type="button" title="Importar">⤒</button>
+  <input type="file" id="fileImport" accept="application/json,.json" hidden>
+</header>
+
+<div class="layout">
+  <aside class="sidebar collapsed" id="sidebar">
+    <button class="nav-item active" type="button" data-page="inicio"><span class="nav-icon">🏠</span>Início</button>
+    <button class="nav-item" type="button" data-page="clientes"><span class="nav-icon">🤵🏽</span>Clientes</button>
+    <button class="nav-item" type="button" data-page="carregadores"><span class="nav-icon">🔋</span>Carregadores</button>
+    <button class="nav-item" type="button" data-page="veiculos"><span class="nav-icon">🚘</span>Veículos</button>
+    <button class="nav-item" type="button" data-page="dimensionamento"><span class="nav-icon">⚡</span>Dimensionamento</button>
+    <button class="nav-item" type="button" data-page="documentos"><span class="nav-icon">📖</span>Documentos</button>
+  </aside>
+  <div class="overlay" id="overlay"></div>
+  <main><div class="content">
+
+    <section class="page active" id="page-inicio">
+      <div class="step-heading"><div><div class="eyebrow">Painel</div><h1>Seus projetos de recarga.</h1></div></div>
+      <div class="section-panel">
+        <h2>Resumo</h2>
+        <div class="form-grid" style="margin-top:14px">
+          <div class="list-card"><div class="list-card-main"><div class="list-card-title" id="dash-clientes">0</div><div class="list-card-sub">Clientes</div></div></div>
+          <div class="list-card"><div class="list-card-main"><div class="list-card-title" id="dash-carregadores">0</div><div class="list-card-sub">Carregadores</div></div></div>
+          <div class="list-card"><div class="list-card-main"><div class="list-card-title" id="dash-veiculos">0</div><div class="list-card-sub">Veículos</div></div></div>
+          <div class="list-card"><div class="list-card-main"><div class="list-card-title" id="dash-dimensionamentos">0</div><div class="list-card-sub">Dimensionamentos salvos</div></div></div>
+        </div>
+        <div class="row mt-20">
+          <button class="primary-button" type="button" data-open-page="dimensionamento">Novo dimensionamento →</button>
+          <button class="btn-warn" type="button" id="btnSeedData">📥 Repor banco</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="page-clientes">
+      <div class="step-heading"><div><div class="eyebrow">Cadastro</div><h1>Clientes</h1></div><div class="step-count" id="count-clientes">0</div></div>
+      <div class="toolbar">
+        <div class="search-wrap"><span class="search-icon">⌕</span><input class="search-input" id="search-clientes" type="text" placeholder="Buscar cliente..." autocomplete="off"><div class="search-dropdown" id="dropdown-clientes"></div></div>
+        <button class="btn-add" type="button" data-add="cliente"><span>＋</span> Adicionar cliente</button>
+      </div>
+      <div class="list" id="list-clientes"></div>
+    </section>
+
+    <section class="page" id="page-carregadores">
+      <div class="step-heading"><div><div class="eyebrow">Equipamentos</div><h1>Carregadores</h1></div><div class="step-count" id="count-carregadores">0</div></div>
+      <div class="toolbar">
+        <div class="search-wrap"><span class="search-icon">⌕</span><input class="search-input" id="search-carregadores" type="text" placeholder="Buscar carregador..." autocomplete="off"><div class="search-dropdown" id="dropdown-carregadores"></div></div>
+        <button class="btn-add" type="button" data-add="carregador"><span>＋</span> Adicionar carregador</button>
+      </div>
+      <div class="list" id="list-carregadores"></div>
+    </section>
+
+    <section class="page" id="page-veiculos">
+      <div class="step-heading"><div><div class="eyebrow">Compatibilidade</div><h1>Veículos</h1></div><div class="step-count" id="count-veiculos">0</div></div>
+      <div class="toolbar">
+        <div class="search-wrap"><span class="search-icon">⌕</span><input class="search-input" id="search-veiculos" type="text" placeholder="Buscar veículo..." autocomplete="off"><div class="search-dropdown" id="dropdown-veiculos"></div></div>
+        <button class="btn-add" type="button" data-add="veiculo"><span>＋</span> Adicionar veículo</button>
+      </div>
+      <div class="list" id="list-veiculos"></div>
+    </section>
+
+    <section class="page" id="page-dimensionamento">
+      <div class="step-heading"><div><div class="eyebrow">Dimensionamento</div><h1 id="dim-title">Dados do projeto.</h1></div><div class="step-count" id="dim-step-count">passo 1 de 6</div></div>
+      <nav class="stepper" id="stepper"></nav>
+
+      <!-- PASSO 1 -->
+      <div class="dim-step" data-step="1">
+        <div class="section-panel">
+          <h2>Identificação do projeto</h2>
+          <p>Dados do responsável técnico e do local da instalação.</p>
+          <div class="form-grid mt-16">
+            <div class="form-field full"><label class="form-label">Responsável técnico <span class="req">*</span></label><input class="form-input" id="d_responsavel" type="text"></div>
+            <div class="form-field full">
+              <label class="form-label">Cliente <span class="req">*</span></label>
+              <select class="form-select" id="d_cliente"></select>
+              <div class="muted mt-8" id="d_cliente-info"></div>
+            </div>
+            <div class="form-field"><label class="form-label">Tipo de edificação <span class="req">*</span></label><select class="form-select" id="d_tipoEdif"><option value="">Selecione...</option><option value="residencia">Residência</option><option value="edificio">Edifício residencial</option><option value="comercio">Comércio</option><option value="empresa">Empresa</option></select></div>
+            <div class="form-field"><label class="form-label">Tipo de garagem <span class="req">*</span></label><select class="form-select" id="d_tipoGaragem"><option value="">Selecione...</option><option value="interna">Interna</option><option value="externa">Externa</option><option value="subsolo">Subsolo</option><option value="coberta">Coberta</option></select></div>
+            <div class="form-field full"><label class="form-label">Endereço completo <span class="req">*</span></label><input class="form-input" id="d_endereco" type="text"></div>
+            <div class="form-field"><label class="form-label">Data</label><input class="form-input" id="d_data" type="date"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASSO 2 -->
+      <div class="dim-step" data-step="2" hidden>
+        <div class="section-panel">
+          <h2>Veículos e necessidades</h2>
+          <div class="form-grid mt-16">
+            <div class="form-field full"><label class="form-label">O cliente possui VE?</label><select class="form-select" id="d_possuiVeiculo"><option value="nao">Não / Não informado</option><option value="sim">Sim</option></select></div>
+          </div>
+          <div id="dim-wrap-veiculo" hidden>
+            <div class="form-grid mt-16">
+              <div class="form-field full">
+                <label class="form-label">Veículo</label>
+                <input class="form-input" id="d_veiculoBusca" type="text" placeholder="Filtrar..." autocomplete="off" style="margin-bottom:6px">
+                <select class="form-select" id="d_veiculo"></select>
+              </div>
+              <div class="form-field"><label class="form-label">Necessidade</label><select class="form-select" id="d_necessidade"><option value="">Selecione...</option><option value="lenta">Lenta (até 7,4 kW)</option><option value="media">Média (11–22 kW)</option><option value="rapida">Rápida (≥ 30 kW)</option></select></div>
+              <div class="form-field"><label class="form-label">VE simultâneos</label><input class="form-input" id="d_qtdVeiculos" type="number" min="1" step="1" value="1"></div>
+              <div class="form-field full" id="d_tempo-estimado-wrap" hidden>
+                <div class="aviso" style="border-color:rgba(41,211,165,.25);color:#8fdfc6;background:var(--green-soft)">
+                  <span>⏱</span><span id="d_tempo-estimado"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="section-panel">
+          <h2>Carregadores do projeto</h2>
+          <p id="d_info-filtro" class="muted"></p>
+          <div class="toolbar" style="margin-top:14px;margin-bottom:0">
+            <div class="search-wrap">
+              <input class="form-input" id="d_carrBusca" type="text" placeholder="Filtrar carregador..." style="margin-bottom:6px">
+              <select class="form-select" id="d_addCarregador"></select>
+            </div>
+            <button class="btn-add" type="button" id="d_addCarr">＋ Adicionar</button>
+          </div>
+          <div id="d_carrPreview" class="mt-16"></div>
+          <div class="list mt-16" id="d_carrList"></div>
+        </div>
+      </div>
+
+      <!-- PASSO 3 -->
+      <div class="dim-step" data-step="3" hidden>
+        <div class="section-panel">
+          <h2>Quadro de distribuição</h2>
+          <p>Tensão e fases da rede onde os carregadores serão instalados.</p>
+          <div class="form-grid mt-16">
+            <div class="form-field"><label class="form-label">Tensão do quadro <span class="req">*</span></label><select class="form-select" id="d_qd_tensao"><option value="">Selecione...</option><option value="127">127 V</option><option value="220">220 V</option><option value="380">380 V</option></select></div>
+            <div class="form-field"><label class="form-label">Fases do quadro <span class="req">*</span></label><select class="form-select" id="d_qd_fases"><option value="">Selecione...</option><option value="mono">Monofásico</option><option value="bi">Bifásico</option><option value="tri">Trifásico</option></select></div>
+            <div class="form-field"><label class="form-label">Carga disponível (kVA)</label><input class="form-input" id="d_qd_carga" type="number" step="0.1"></div>
+            <div class="form-field"><label class="form-label">Fator de potência</label><input class="form-input" id="d_qd_fp" type="number" step="0.01" value="0.95"></div>
+            <div class="form-field"><label class="form-label">% demanda</label><input class="form-input" id="d_qd_pctDemanda" type="number" step="1" value="100"></div>
+            <div class="form-field"><label class="form-label">Disjuntor geral (A)</label><input class="form-input" id="d_qd_djGeral" type="number" step="1"></div>
+          </div>
+          <div id="d_aviso-rede" class="mt-16"></div>
+        </div>
+        <div class="section-panel">
+          <h2>Proteções obrigatórias</h2>
+          <div id="d_protecoes" class="mt-16"></div>
+        </div>
+        <div class="section-panel">
+          <h2>Trechos por carregador</h2>
+          <p>Clique em cada carregador para preencher os trechos. Cada carregador pode ter 1 ou mais trechos em série.</p>
+          <div class="carr-btn-grid" id="d_carrBtns"></div>
+          <div id="d_trechoForm" class="mt-16"></div>
+        </div>
+      </div>
+
+      <!-- PASSO 4 -->
+      <div class="dim-step" data-step="4" hidden>
+        <div class="section-panel">
+          <h2>Resumo dos circuitos</h2>
+          <p>Cada carregador é um circuito independente. A ocupação do conduto é calculada com base no trecho 1 de cada circuito.</p>
+          <div id="d_circuitoResumo" class="mt-16"></div>
+        </div>
+        <div class="section-panel">
+          <h2>Conduto</h2>
+          <p>Informe o conduto único que abrigará todos os circuitos.</p>
+          <div class="form-grid mt-16">
+            <div class="form-field"><label class="form-label">Tipo de conduto</label><select class="form-select" id="d_cond_tipo"><option value="eletrocalha">Eletrocalha</option><option value="eletroduto">Eletroduto</option></select></div>
+            <div class="form-field"><label class="form-label">Tipo físico do cabo</label><select class="form-select" id="d_cond_tipoCabo"></select></div>
+            <div class="form-field" id="d_cond_wrap_larg"><label class="form-label">Largura da eletrocalha (mm)</label><select class="form-select" id="d_cond_larg"></select></div>
+            <div class="form-field" id="d_cond_wrap_alt"><label class="form-label">Altura da eletrocalha (mm)</label><select class="form-select" id="d_cond_alt"></select></div>
+            <div class="form-field" id="d_cond_wrap_dn" hidden><label class="form-label">Diâmetro nominal do eletroduto</label><select class="form-select" id="d_cond_dn"></select></div>
+          </div>
+          <div id="d_cond_resultado" class="mt-20"></div>
+        </div>
+      </div>
+
+      <!-- PASSO 5 -->
+      <div class="dim-step" data-step="5" hidden>
+        <div class="section-panel"><h2>Resultado do dimensionamento elétrico</h2><div id="d_resultado"></div></div>
+        <div class="section-panel"><h2>Validações</h2><div id="d_validacoes"></div></div>
+      </div>
+
+      <!-- PASSO 6 -->
+      <div class="dim-step" data-step="6" hidden>
+        <div class="section-panel">
+          <h2>Relatório</h2>
+          <div class="row" style="margin-top:14px" id="dimActionsRow">
+            <button class="primary-button" type="button" id="btnSalvarDim">💾 Salvar dimensionamento</button>
+            <button class="btn-warn" type="button" id="btnPrintPdf">📄 Gerar memorial</button>
+            <button class="btn-secondary" type="button" id="btnExportDim">⤓ Exportar JSON</button>
+          </div>
+        </div>
+        <div class="report-preview" id="reportPreview"></div>
+      </div>
+
+      <div class="bottom-actions">
+        <button class="btn-secondary" id="dimPrev" type="button">← Voltar</button>
+        <button class="primary-button" id="dimNext" type="button">Continuar →</button>
+      </div>
+    </section>
+
+    <section class="page" id="page-documentos">
+      <div class="step-heading"><div><div class="eyebrow">Arquivos</div><h1>Documentos</h1></div><div class="step-count" id="count-documentos">0</div></div>
+      <div class="toolbar">
+        <div class="search-wrap"><span class="search-icon">⌕</span><input class="search-input" id="search-documentos" type="text" placeholder="Buscar..." autocomplete="off"><div class="search-dropdown" id="dropdown-documentos"></div></div>
+        <button class="btn-add" type="button" data-add="documento">＋ Adicionar</button>
+      </div>
+      <div class="list" id="list-documentos"></div>
+    </section>
+
+  </div></main>
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop"><div class="modal" id="modalBox">
+  <div class="modal-header"><h2 id="modalTitle">Novo</h2><button class="modal-close" id="modalClose" type="button">✕</button></div>
+  <div class="modal-body" id="modalBody"></div>
+  <div class="modal-footer"><button type="button" class="btn-secondary" id="modalCancel">Cancelar</button><button type="button" class="primary-button" id="modalSubmit">Salvar</button></div>
+</div></div>
+
+<div class="confirm-backdrop" id="confirmBackdrop">
+  <div class="confirm-box">
+    <div class="confirm-header"><div class="confirm-icon info" id="confirmIcon">?</div><div class="confirm-title" id="confirmTitle">Confirmar</div></div>
+    <div class="confirm-message" id="confirmMessage">Tem certeza?</div>
+    <div class="confirm-footer"><button type="button" class="btn-secondary" id="confirmCancel">Cancelar</button><button type="button" class="primary-button" id="confirmOk">Confirmar</button></div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+(function(){
+"use strict";
+var $=function(s,c){return (c||document).querySelector(s)};
+var $$=function(s,c){return Array.prototype.slice.call((c||document).querySelectorAll(s))};
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1)}
+function digits(v){return String(v||"").replace(/\D+/g,"")}
+function n(v,d){var x=Number(v);return isFinite(x)?x:(d!=null?d:0)}
+
+function maskDoc(v){var d=digits(v).slice(0,14);if(d.length<=11)return d.replace(/(\d{3})(\d)/,"$1.$2").replace(/(\d{3})(\d)/,"$1.$2").replace(/(\d{3})(\d{1,2})$/,"$1-$2");return d.replace(/(\d{2})(\d)/,"$1.$2").replace(/(\d{3})(\d)/,"$1.$2").replace(/(\d{3})(\d)/,"$1/$2").replace(/(\d{4})(\d{1,2})$/,"$1-$2")}
+function maskCEP(v){return digits(v).slice(0,8).replace(/(\d{5})(\d)/,"$1-$2")}
+function maskTel(v){var d=digits(v).slice(0,11);if(d.length<=10)return d.replace(/(\d{2})(\d)/,"($1) $2").replace(/(\d{4})(\d{1,4})$/,"$1-$2");return d.replace(/(\d{2})(\d)/,"($1) $2").replace(/(\d{5})(\d{1,4})$/,"$1-$2")}
+function isValidCPF(c){c=digits(c);if(c.length!==11||/^(\d)\1+$/.test(c))return false;var s=0,i,r;for(i=0;i<9;i++)s+=parseInt(c[i])*(10-i);r=(s*10)%11;if(r===10)r=0;if(r!==parseInt(c[9]))return false;s=0;for(i=0;i<10;i++)s+=parseInt(c[i])*(11-i);r=(s*10)%11;if(r===10)r=0;if(r!==parseInt(c[10]))return false;return true}
+function isValidCNPJ(c){c=digits(c);if(c.length!==14||/^(\d)\1+$/.test(c))return false;var t=[6,5,4,3,2,9,8,7,6,5,4,3,2],d,i,s=0;for(i=0;i<12;i++)s+=parseInt(c[i])*t[i+1];d=s%11<2?0:11-(s%11);if(d!==parseInt(c[12]))return false;s=0;for(i=0;i<13;i++)s+=parseInt(c[i])*t[i];d=s%11<2?0:11-(s%11);if(d!==parseInt(c[13]))return false;return true}
+
+/* ============ CONFIRM ============ */
+var cBack=$("#confirmBackdrop"),cIcon=$("#confirmIcon"),cTitle=$("#confirmTitle"),cMsg=$("#confirmMessage"),cOk=$("#confirmOk"),cCancel=$("#confirmCancel"),cCb=null;
+function openConfirm(o,cb){
+  o=o||{};var v=o.variant||"info";var icons={info:"?",danger:"!",warn:"⚠"};
+  cIcon.className="confirm-icon "+v;cIcon.textContent=icons[v]||"?";
+  cTitle.textContent=o.title||"Confirmar";cMsg.textContent=o.message||"Tem certeza?";
+  cOk.textContent=o.okText||"Confirmar";cCancel.textContent=o.cancelText||"Cancelar";
+  cOk.className=(v==="danger"?"btn-danger":v==="warn"?"btn-warn":"primary-button");
+  cCb=cb||null;cBack.classList.add("open");document.body.style.overflow="hidden";
+  setTimeout(function(){cOk.focus()},80);
+}
+function closeConfirm(r){cBack.classList.remove("open");if(!modalBack.classList.contains("open"))document.body.style.overflow="";var cb=cCb;cCb=null;if(cb)try{cb(r)}catch(e){console.error(e)}}
+cOk.addEventListener("click",function(){closeConfirm(true)});
+cCancel.addEventListener("click",function(){closeConfirm(false)});
+cBack.addEventListener("click",function(e){if(e.target===cBack)closeConfirm(false)});
+
+/* ============ DIÂMETROS CABOS ============ */
+var DIAMETROS_CABO={
+  pvc:         {1.5:3.2, 2.5:3.9, 4:4.6, 6:5.2, 10:6.2, 16:6.8, 25:8.4, 35:9.4, 50:11.2, 70:12.7, 95:14.7, 120:16.1, 150:17.9, 185:20.2, 240:23.0, 300:26.0},
+  xlpe_sem_cob:{1.5:5.5, 2.5:6.0, 4:6.8, 6:7.3, 10:8.0, 16:9.0, 25:10.8, 35:12.0, 50:13.9, 70:15.5, 95:17.7, 120:19.2, 150:21.4, 185:23.8, 240:26.5, 300:29.5},
+  pvc_com_cob: {1.5:4.9, 2.5:5.3, 4:5.9, 6:6.4, 10:7.6, 16:10.2, 25:11.9, 35:13.1, 50:14.8, 70:16.6, 95:19.2, 120:21.0, 150:23.0, 185:25.5, 240:28.0, 300:31.0}
+};
+var TIPO_CABO_FISICO={pvc:"PVC 450/750 V", xlpe_sem_cob:"XLPE/EPR 0,6/1 kV (sem cobertura)", pvc_com_cob:"PVC Especial c/ cobertura"};
+function areaCabo(diametro){return Math.PI*Math.pow(diametro/2,2)}
+
+/* ============ TAB 58 — PE ============ */
+function secaoPE(Sfase){
+  var S=n(Sfase,0);
+  if(S<=16)return S;
+  if(S<=35)return 16;
+  var meio=S/2;
+  var comerciais=[16,25,35,50,70,95,120,150,185,240,300];
+  for(var i=0;i<comerciais.length;i++){if(comerciais[i]>=meio)return comerciais[i]}
+  return comerciais[comerciais.length-1];
+}
+
+/* ============ ELETRODUTOS ============ */
+var ELETRODUTOS=[
+  {dn:16, int:12.7},{dn:20, int:16.1},{dn:25, int:21.0},{dn:32, int:26.8},
+  {dn:40, int:35.0},{dn:50, int:39.8},{dn:60, int:50.2},{dn:75, int:64.1},
+  {dn:85, int:75.6},{dn:110, int:97}
+];
+function areaEletroduto(dn){for(var i=0;i<ELETRODUTOS.length;i++){if(ELETRODUTOS[i].dn===n(dn))return Math.PI*Math.pow(ELETRODUTOS[i].int/2,2)}return Math.PI*Math.pow(16.1/2,2)}
+
+/* ============ ELETROCALHAS ============ */
+var ELETROCALHAS_LARG=[50,100,150,200,300,400,500];
+var ELETROCALHAS_ALT=[50,100,150];
+
+/* ============ NOTAÇÃO DE CONDUTORES ============ */
+function notacaoCondutores(fases,tensao,bitolaFase,bitolaNeutro,bitolaPE,precisaNeutro){
+  var t=n(tensao,220);
+  var bF=bitolaFase;
+  var bN=bitolaNeutro||bitolaFase;
+  var bP=bitolaPE||secaoPE(bitolaFase);
+  var partes=[];
+  if(fases==="mono"){
+    partes.push("1x"+bF);
+    partes.push("1x"+bN);
+    partes.push("1x"+bP);
+  }else if(fases==="bi"){
+    partes.push("2x"+bF);
+    partes.push("1x"+bN);
+    partes.push("1x"+bP);
+  }else{
+    partes.push("3x"+bF);
+    if(precisaNeutro){
+      partes.push("1x"+bN);
+    }
+    partes.push("1x"+bP);
+  }
+  return partes.join(" + ");
+}
+
+/* ============ POTÊNCIA POR TENSÃO ============ */
+function ppt(tensao,fases,tipoLigacao,potencia){return {tensao:Number(tensao),fases:fases,tipoLigacao:tipoLigacao,potencia:Number(potencia)}}
+function inferirPotenciaPorTensao(c){
+  if(c.potenciaPorTensao && c.potenciaPorTensao.length) return c.potenciaPorTensao;
+  var P=n(c.potencia,0);var arr=[];var nome=(c.apelido||"")+" "+(c.modelo||"");
+  var eh22=P>=20,eh11=P>=10 && P<20,eh74=P>=7 && P<10,eh37=P<7;
+  if(eh22){arr.push(ppt(380,"tri","FF",P));if(/WEG|NeoCharge|Gen[eé]rico/i.test(nome)){arr.push(ppt(220,"tri","FF",12.7))}}
+  else if(eh11){arr.push(ppt(220,"tri","FF",P));arr.push(ppt(380,"tri","FF",P))}
+  else if(eh74){arr.push(ppt(127,"mono","FN",3.7));arr.push(ppt(220,"mono","FN",P));arr.push(ppt(220,"bi","FF",P));arr.push(ppt(220,"tri","FF",P))}
+  else if(eh37){arr.push(ppt(127,"mono","FN",P));arr.push(ppt(220,"mono","FN",P))}
+  return arr;
+}
+function descreverLigacao(fases,tensao){
+  if(!fases||!tensao)return "";
+  if(fases==="mono"){
+    if(Number(tensao)===127)return "Monofásico 127 V fase-neutro";
+    if(Number(tensao)===220)return "Monofásico 220 V fase-neutro";
+    return "Monofásico "+tensao+" V fase-neutro";
+  }
+  if(fases==="bi"){
+    if(Number(tensao)===220)return "Bifásico 220 V fase-fase";
+    if(Number(tensao)===380)return "Bifásico 380 V fase-fase";
+    return "Bifásico "+tensao+" V fase-fase";
+  }
+  if(fases==="tri"){
+    if(Number(tensao)===220)return "Trifásico 220 V fase-fase (sistema 127/220 V)";
+    if(Number(tensao)===380)return "Trifásico 380 V fase-fase (sistema 220/380 V)";
+    return "Trifásico "+tensao+" V fase-fase";
+  }
+  return "";
+}
+function potenciaParaTensao(carr,tensao,fases,tipoLigacao){
+  var arr=(carr.potenciaPorTensao && carr.potenciaPorTensao.length) ? carr.potenciaPorTensao : inferirPotenciaPorTensao(carr);
+  if(arr && arr.length){
+    var t=Number(tensao);
+    var match=arr.find(function(p){return Number(p.tensao)===t && p.fases===fases && (p.tipoLigacao||"FF")===(tipoLigacao||"FF")});
+    if(match) return {potencia:Number(match.potencia),encontrado:true};
+  }
+  return {potencia:Number(carr.potencia),encontrado:false};
+}
+
+/* ============ BANCO ============ */
+var SEED_CARREGADORES=[
+  {apelido:"WEG WEMOB WALL 7,4kW",fabricante:"WEG",modelo:"WEMOB WALL",potencia:7.4,tensao:220,fases:"mono",tipoLigacao:"FN",conector:"tipo2",corrente:32,ocpp:"ocpp16",protecaoCC:"nao",smartCharging:"nao",potenciaPorTensao:[ppt(127,"mono","FN",3.7),ppt(220,"mono","FN",7.4),ppt(220,"bi","FF",7.4),ppt(220,"tri","FF",7.4),ppt(380,"tri","FF",7.4)]},
+  {apelido:"WEG WEMOB WALL 11kW",fabricante:"WEG",modelo:"WEMOB WALL",potencia:11.0,tensao:380,fases:"tri",tipoLigacao:"FF",conector:"tipo2",corrente:16,ocpp:"ocpp16",protecaoCC:"nao",smartCharging:"nao",potenciaPorTensao:[ppt(220,"tri","FF",11.0),ppt(380,"tri","FF",11.0)]},
+  {apelido:"WEG WEMOB WALL 22kW",fabricante:"WEG",modelo:"WEMOB WALL",potencia:22.0,tensao:380,fases:"tri",tipoLigacao:"FF",conector:"tipo2",corrente:32,ocpp:"ocpp16",protecaoCC:"nao",smartCharging:"nao",potenciaPorTensao:[ppt(220,"tri","FF",12.7),ppt(380,"tri","FF",22.0)]},
+  {apelido:"WEG WEMOB PARK 22kW",fabricante:"WEG",modelo:"WEMOB PARK",potencia:22.0,tensao:380,fases:"tri",tipoLigacao:"FF",conector:"tipo2",corrente:32,ocpp:"ocpp16",protecaoCC:"nao",smartCharging:"sim",potenciaPorTensao:[ppt(220,"tri","FF",12.7),ppt(380,"tri","FF",22.0)]},
+  {apelido:"ABB Terra AC 22kW",fabricante:"ABB",modelo:"Terra AC",potencia:22.0,tensao:380,fases:"tri",tipoLigacao:"FF",conector:"tipo2",corrente:32,ocpp:"ocpp16",protecaoCC:"sim",smartCharging:"sim",potenciaPorTensao:[ppt(380,"tri","FF",22.0)]},
+  {apelido:"Intelbras EVE 0220B 22kW",fabricante:"Intelbras",modelo:"EVE 0220B",potencia:22.0,tensao:380,fases:"tri",tipoLigacao:"FF",conector:"tipo2",corrente:32,ocpp:"ocpp16",protecaoCC:"sim",smartCharging:"sim",potenciaPorTensao:[ppt(380,"tri","FF",22.0)]},
+  {apelido:"NeoCharge Smart 22kW",fabricante:"NeoCharge",modelo:"Smart Tri",potencia:22.0,tensao:380,fases:"tri",tipoLigacao:"FF",conector:"tipo2",corrente:32,ocpp:"ocpp16",protecaoCC:"sim",smartCharging:"sim",potenciaPorTensao:[ppt(220,"tri","FF",12.7),ppt(380,"tri","FF",22.0)]},
+  {apelido:"Schneider EVlink 22kW",fabricante:"Schneider Electric",modelo:"EVlink Smart Wallbox",potencia:22.0,tensao:380,fases:"tri",tipoLigacao:"FF",conector:"tipo2",corrente:32,ocpp:"ocpp16",protecaoCC:"sim",smartCharging:"nao",potenciaPorTensao:[ppt(380,"tri","FF",22.0)]},
+  {apelido:"Livoltek CA 22kW",fabricante:"Livoltek",modelo:"A0220400E11",potencia:22.0,tensao:380,fases:"tri",tipoLigacao:"FF",conector:"tipo2",corrente:32,ocpp:"ocpp16",protecaoCC:"sim",smartCharging:"sim",potenciaPorTensao:[ppt(380,"tri","FF",22.0)]},
+  {apelido:"Wallbox Pulsar Plus 22kW",fabricante:"Wallbox",modelo:"Pulsar Plus",potencia:22.0,tensao:380,fases:"tri",tipoLigacao:"FF",conector:"tipo2",corrente:32,ocpp:"ocpp16",protecaoCC:"sim",smartCharging:"sim",potenciaPorTensao:[ppt(380,"tri","FF",22.0)]},
+  {apelido:"Zaptec Pro 22kW",fabricante:"Zaptec",modelo:"Pro",potencia:22.0,tensao:380,fases:"tri",tipoLigacao:"FF",conector:"tipo2",corrente:32,ocpp:"ocpp16",protecaoCC:"sim",smartCharging:"sim",potenciaPorTensao:[ppt(380,"tri","FF",22.0)]},
+  {apelido:"Genérico 22kW Tri",fabricante:"Genérico",modelo:"WB-T2-22",potencia:22.0,tensao:380,fases:"tri",tipoLigacao:"FF",conector:"tipo2",corrente:32,ocpp:"",protecaoCC:"nao",smartCharging:"nao",potenciaPorTensao:[ppt(220,"tri","FF",12.7),ppt(380,"tri","FF",22.0)]},
+  {apelido:"Genérico 11kW Tri",fabricante:"Genérico",modelo:"WB-T2-11",potencia:11.0,tensao:380,fases:"tri",tipoLigacao:"FF",conector:"tipo2",corrente:16,ocpp:"",protecaoCC:"nao",smartCharging:"nao",potenciaPorTensao:[ppt(220,"tri","FF",11.0),ppt(380,"tri","FF",11.0)]},
+  {apelido:"Genérico 7,4kW Mono 220V",fabricante:"Genérico",modelo:"WB-T2-74",potencia:7.4,tensao:220,fases:"mono",tipoLigacao:"FN",conector:"tipo2",corrente:32,ocpp:"",protecaoCC:"nao",smartCharging:"nao",potenciaPorTensao:[ppt(127,"mono","FN",3.7),ppt(220,"mono","FN",7.4)]},
+  {apelido:"Genérico 7,4kW Bi 220V",fabricante:"Genérico",modelo:"WB-T2-74B",potencia:7.4,tensao:220,fases:"bi",tipoLigacao:"FF",conector:"tipo2",corrente:32,ocpp:"",protecaoCC:"nao",smartCharging:"nao",potenciaPorTensao:[ppt(220,"bi","FF",7.4)]},
+  {apelido:"Genérico 3,7kW Mono 127V",fabricante:"Genérico",modelo:"WB-T2-37",potencia:3.7,tensao:127,fases:"mono",tipoLigacao:"FN",conector:"tipo2",corrente:16,ocpp:"",protecaoCC:"nao",smartCharging:"nao",potenciaPorTensao:[ppt(127,"mono","FN",3.7)]}
+];
+var SEED_VEICULOS=[
+  {apelido:"BYD Dolphin Mini",marca:"BYD",modelo:"Dolphin Mini",ano:2025,bateria:38.8,potenciaMax:40,conector:"ccs2"},
+  {apelido:"BYD Dolphin",marca:"BYD",modelo:"Dolphin",ano:2025,bateria:44.9,potenciaMax:60,conector:"ccs2"},
+  {apelido:"BYD Dolphin Plus",marca:"BYD",modelo:"Dolphin Plus",ano:2025,bateria:60.5,potenciaMax:80,conector:"ccs2"},
+  {apelido:"BYD Seal",marca:"BYD",modelo:"Seal",ano:2025,bateria:82.5,potenciaMax:150,conector:"ccs2"},
+  {apelido:"BYD Song Plus DM-i",marca:"BYD",modelo:"Song Plus DM-i",ano:2025,bateria:18.3,potenciaMax:7,conector:"tipo2"},
+  {apelido:"GWM Ora 03",marca:"GWM",modelo:"Ora 03",ano:2025,bateria:48,potenciaMax:64,conector:"ccs2"},
+  {apelido:"GWM Haval H6 PHEV",marca:"GWM",modelo:"Haval H6 PHEV",ano:2025,bateria:34,potenciaMax:7,conector:"tipo2"},
+  {apelido:"Volvo EX30",marca:"Volvo",modelo:"EX30",ano:2025,bateria:51,potenciaMax:150,conector:"ccs2"},
+  {apelido:"BMW iX1",marca:"BMW",modelo:"iX1 xDrive30",ano:2025,bateria:66.5,potenciaMax:130,conector:"ccs2"},
+  {apelido:"Toyota Corolla Cross Hybrid",marca:"Toyota",modelo:"Corolla Cross Hybrid",ano:2025,bateria:1.3,potenciaMax:3.3,conector:"tipo2"},
+  {apelido:"Tesla Model 3",marca:"Tesla",modelo:"Model 3",ano:2025,bateria:75,potenciaMax:250,conector:"nacs"},
+  {apelido:"Tesla Model Y",marca:"Tesla",modelo:"Model Y",ano:2025,bateria:75,potenciaMax:250,conector:"nacs"},
+  {apelido:"Nissan Leaf",marca:"Nissan",modelo:"Leaf",ano:2025,bateria:40,potenciaMax:50,conector:"chademo"}
+];
+
+/* ============ MÉTODOS NBR 5410 ============ */
+var METODOS={
+  A1:{label:"A1 — condutores isolados em eletroduto embutido em parede termicamente isolante",tabela:"36/37",linha42:1,ambiente:"aereo"},
+  A2:{label:"A2 — cabo multipolar em eletroduto embutido em parede termicamente isolante",tabela:"36/37",linha42:1,ambiente:"aereo"},
+  B1:{label:"B1 — condutores isolados em eletroduto aparente/não-circular sobre parede",tabela:"36/37",linha42:1,ambiente:"aereo"},
+  B2:{label:"B2 — cabo multipolar em eletroduto aparente/não-circular sobre parede",tabela:"36/37",linha42:1,ambiente:"aereo"},
+  C:{label:"C — cabos sobre parede, teto, bandeja não-perfurada ou prateleira",tabela:"36/37",linha42:2,ambiente:"aereo"},
+  D:{label:"D — cabos em eletroduto enterrado ou diretamente enterrado",tabela:"36/37",linha42:"44/45",ambiente:"solo"},
+  E:{label:"E — cabos multipolares em bandeja perfurada / suporte / tela / leito",tabela:"38/39",linha42:4,ambiente:"aereo"},
+  "E-unip":{label:"E-unip — cabos unipolares em bandeja perfurada",tabela:"38/39",linha42:4,ambiente:"aereo"},
+  "F-just":{label:"F-just — cabos unipolares justapostos em bandeja perfurada",tabela:"38/39",linha42:4,ambiente:"aereo"},
+  "F-trif":{label:"F-trif — cabos unipolares em trifólio em bandeja perfurada",tabela:"38/39",linha42:4,ambiente:"aereo"},
+  "F-horiz":{label:"F-horiz — cabos unipolares no mesmo plano horizontal",tabela:"38/39",linha42:4,ambiente:"aereo"},
+  "F-vert":{label:"F-vert — cabos unipolares no mesmo plano vertical",tabela:"38/39",linha42:4,ambiente:"aereo"},
+  "G-just":{label:"G-just — cabos unipolares justapostos sobre leito/suporte",tabela:"38/39",linha42:5,ambiente:"aereo"},
+  "G-esp":{label:"G-esp — cabos unipolares espaçados sobre leito/suporte",tabela:"38/39",linha42:5,ambiente:"aereo"},
+  "G":{label:"G — condutores nus ou isolados sobre isoladores",tabela:"38/39",linha42:5,ambiente:"aereo"}
+};
+var METODO_SHORT={A1:"A1",A2:"A2",B1:"B1",B2:"B2",C:"C",D:"D",E:"E","E-unip":"E-u","F-just":"F-j","F-trif":"F-t","F-horiz":"F-h","F-vert":"F-v","G-just":"G-j","G-esp":"G-e","G":"G"};
+
+/* ============ TABELAS 36/37/38/39 ============ */
+var TB36_COBRE={A1_2:{1.5:14.5,2.5:19.5,4:26,6:34,10:46,16:61,25:80,35:99,50:119,70:151,95:182,120:210},A1_3:{1.5:13.5,2.5:18,4:24,6:31,10:42,16:56,25:73,35:89,50:108,70:136,95:164,120:188},A2_2:{1.5:14,2.5:18.5,4:25,6:32,10:43,16:57,25:75,35:92,50:110,70:139,95:167,120:192},A2_3:{1.5:13,2.5:17.5,4:23,6:29,10:39,16:52,25:68,35:83,50:99,70:125,95:150,120:172},B1_2:{1.5:17.5,2.5:24,4:32,6:41,10:57,16:76,25:101,35:125,50:151,70:192,95:232,120:269},B1_3:{1.5:15.5,2.5:21,4:28,6:36,10:50,16:68,25:89,35:110,50:134,70:171,95:207,120:239},B2_2:{1.5:16.5,2.5:23,4:30,6:38,10:52,16:69,25:90,35:111,50:133,70:170,95:206,120:239},B2_3:{1.5:15,2.5:20,4:27,6:34,10:46,16:62,25:80,35:99,50:118,70:149,95:179,120:206},C_2:{1.5:19.5,2.5:27,4:36,6:46,10:63,16:85,25:112,35:138,50:168,70:213,95:258,120:299},C_3:{1.5:17.5,2.5:24,4:32,6:41,10:57,16:76,25:96,35:119,50:144,70:184,95:223,120:259},D_2:{1.5:13.5,2.5:18,4:25,6:32,10:43,16:57,25:75,35:92,50:110,70:139,95:167,120:192},D_3:{1.5:12,2.5:16,4:22,6:28,10:39,16:53,25:70,35:86,50:104,70:129,95:155,120:179}};
+var TB36_ALUM={A1_2:{2.5:15,4:20,6:25,10:35,16:46,25:61,35:75,50:91,70:116,95:140,120:162},A1_3:{2.5:14,4:18.5,6:24,10:32,16:42,25:56,35:69,50:83,70:105,95:127,120:146},A2_2:{2.5:14,4:19,6:25,10:33,16:43,25:57,35:70,50:84,70:107,95:129,120:148},A2_3:{2.5:13.5,4:18,6:22,10:30,16:40,25:52,35:64,50:77,70:97,95:116,120:133},B1_2:{2.5:18.5,4:25,6:32,10:44,16:59,25:78,35:96,50:117,70:148,95:180,120:208},B1_3:{2.5:16.5,4:22,6:28,10:39,16:53,25:69,35:85,50:104,70:132,95:161,120:185},B2_2:{2.5:17.5,4:23,6:29,10:40,16:53,25:70,35:86,50:103,70:132,95:160,120:185},B2_3:{2.5:15.5,4:21,6:26,10:36,16:48,25:62,35:77,50:92,70:116,95:140,120:160},C_2:{2.5:21,4:28,6:36,10:49,16:66,25:87,35:107,50:130,70:165,95:200,120:232},C_3:{2.5:18.5,4:25,6:32,10:44,16:59,25:74,35:92,50:112,70:143,95:173,120:201},D_2:{2.5:14,4:19,6:25,10:33,16:44,25:58,35:71,50:85,70:108,95:130,120:148},D_3:{2.5:12.5,4:17,6:22,10:30,16:41,25:54,35:67,50:81,70:100,95:120,120:139}};
+var TB37_COBRE={A1_2:{1.5:19,2.5:26,4:35,6:45,10:61,16:81,25:106,35:131,50:158,70:200,95:241,120:278},A1_3:{1.5:17.5,2.5:24,4:32,6:41,10:57,16:76,25:96,35:119,50:144,70:184,95:223,120:259},A2_2:{1.5:18.5,2.5:25,4:33,6:42,10:57,16:76,25:99,35:121,50:145,70:183,95:220,120:253},A2_3:{1.5:17,2.5:23,4:31,6:39,10:52,16:71,25:89,35:109,50:130,70:164,95:197,120:227},B1_2:{1.5:22,2.5:30,4:40,6:51,10:70,16:94,25:119,35:147,50:179,70:229,95:278,120:322},B1_3:{1.5:18.5,2.5:25,4:34,6:43,10:60,16:80,25:101,35:126,50:153,70:196,95:238,120:276},B2_2:{1.5:20,2.5:27,4:37,6:46,10:64,16:85,25:109,35:134,50:164,70:211,95:256,120:297},B2_3:{1.5:18.5,2.5:25,4:33,6:42,10:57,16:76,25:96,35:119,50:144,70:184,95:223,120:259},C_2:{1.5:24,2.5:33,4:45,6:58,10:80,16:107,25:138,35:171,50:209,70:269,95:328,120:382},C_3:{1.5:22,2.5:30,4:40,6:51,10:70,16:94,25:119,35:147,50:179,70:229,95:278,120:322},D_2:{1.5:18,2.5:24,4:32,6:41,10:57,16:76,25:96,35:119,50:144,70:184,95:223,120:259},D_3:{1.5:16,2.5:22,4:28,6:36,10:50,16:68,25:89,35:110,50:134,70:171,95:207,120:239}};
+var TB37_ALUM={A1_2:{2.5:20,4:27,6:35,10:47,16:62,25:81,35:100,50:121,70:153,95:184,120:213},A1_3:{2.5:18.5,4:24.5,6:32,10:44,16:58,25:73,35:91,50:110,70:141,95:171,120:198},A2_2:{2.5:19,4:25.5,6:32.5,10:44,16:58,25:76,35:93,50:111,70:140,95:169,120:194},A2_3:{2.5:17.5,4:24,6:30,10:40,16:54,25:68,35:83,50:100,70:126,95:151,120:174},B1_2:{2.5:23,4:31,6:39,10:54,16:72,25:91,35:113,50:137,70:176,95:213,120:247},B1_3:{2.5:19,4:26,6:33,10:46,16:62,25:78,35:97,50:118,70:151,95:183,120:212},B2_2:{2.5:21,4:28.5,6:35.5,10:49,16:65,25:84,35:103,50:126,70:162,95:197,120:228},B2_3:{2.5:19,4:25.5,6:32.5,10:44,16:58,25:74,35:91,50:111,70:141,95:171,120:199},C_2:{2.5:25.5,4:34.5,6:44.5,10:61,16:82,25:106,35:131,50:161,70:207,95:252,120:294},C_3:{2.5:23,4:31,6:39,10:54,16:72,25:91,35:113,50:137,70:176,95:213,120:247},D_2:{2.5:18.5,4:24.5,6:31.5,10:44,16:58,25:74,35:91,50:111,70:141,95:171,120:199},D_3:{2.5:17,4:21.5,6:27.5,10:38,16:52,25:68,35:84,50:103,70:131,95:159,120:183}};
+var TB38_COBRE={E_2:{1.5:22,2.5:30,4:40,6:51,10:70,16:94,25:119,35:148,50:180,70:232,95:282,120:328},E_3:{1.5:18.5,2.5:25,4:34,6:43,10:60,16:80,25:101,35:126,50:153,70:196,95:238,120:276},F_2:{1.5:22,2.5:31,4:41,6:53,10:73,16:99,25:131,35:162,50:196,70:251,95:304,120:352},F_3:{1.5:18.5,2.5:25,4:34,6:43,10:60,16:80,25:101,35:126,50:153,70:196,95:238,120:276},F_horiz_3:{1.5:22,2.5:30,4:40,6:51,10:70,16:94,25:119,35:147,50:179,70:229,95:278,120:322},F_vert_3:{1.5:18.5,2.5:25,4:34,6:43,10:60,16:80,25:101,35:126,50:153,70:196,95:238,120:276},G_just_3:{1.5:21,2.5:29,4:39,6:51,10:71,16:97,25:130,35:162,50:197,70:254,95:311,120:454},G_esp_3:{1.5:24,2.5:34,4:45,6:59,10:81,16:110,25:146,35:181,50:219,70:281,95:341,120:500}};
+var TB38_ALUM={E_2:{2.5:23,4:31,6:39,10:54,16:73,25:92,35:113,50:138,70:178,95:216,120:250},E_3:{2.5:19,4:26,6:33,10:46,16:62,25:78,35:97,50:118,70:150,95:183,120:212},F_2:{2.5:24,4:32,6:41,10:57,16:77,25:101,35:125,50:151,70:193,95:234,120:270},F_3:{2.5:19,4:26,6:33,10:46,16:62,25:78,35:97,50:118,70:150,95:183,120:212},F_horiz_3:{2.5:23,4:31,6:39,10:54,16:73,25:92,35:113,50:138,70:176,95:214,120:248},F_vert_3:{2.5:19,4:26,6:33,10:46,16:62,25:78,35:97,50:118,70:150,95:183,120:212},G_just_3:{2.5:22,4:30,6:39,10:55,16:74,25:100,35:125,50:151,70:195,95:239,120:350},G_esp_3:{2.5:26,4:35,6:45,10:62,16:84,25:112,35:139,50:168,70:216,95:262,120:385}};
+var TB39_COBRE={E_2:{1.5:26,2.5:36,4:49,6:63,10:86,16:115,25:149,35:185,50:225,70:289,95:352,120:410},E_3:{1.5:22,2.5:30,4:40,6:51,10:70,16:94,25:119,35:147,50:179,70:229,95:278,120:322},F_2:{1.5:27,2.5:37,4:50,6:65,10:90,16:121,25:161,35:200,50:242,70:310,95:377,120:437},F_3:{1.5:22,2.5:30,4:40,6:51,10:70,16:94,25:119,35:147,50:179,70:229,95:278,120:322},F_horiz_3:{1.5:26,2.5:36,4:49,6:63,10:86,16:115,25:149,35:185,50:225,70:289,95:352,120:410},F_vert_3:{1.5:22,2.5:30,4:40,6:51,10:70,16:94,25:119,35:147,50:179,70:229,95:278,120:322},G_just_3:{1.5:25,2.5:35,4:48,6:63,10:88,16:120,25:161,35:201,50:246,70:318,95:389,120:500},G_esp_3:{1.5:30,2.5:41,4:56,6:73,10:101,16:137,25:182,35:226,50:275,70:353,95:430,120:500}};
+var TB39_ALUM={E_2:{2.5:27,4:37,6:47,10:64,16:86,25:112,35:139,50:168,70:216,95:263,120:307},E_3:{2.5:22,4:30,6:38,10:52,16:70,25:89,35:110,50:134,70:171,95:208,120:240},F_2:{2.5:28,4:37,6:49,10:67,16:90,25:120,35:150,50:181,70:232,95:282,120:327},F_3:{2.5:22,4:30,6:38,10:52,16:70,25:89,35:110,50:134,70:171,95:208,120:240},F_horiz_3:{2.5:27,4:37,6:47,10:64,16:86,25:112,35:139,50:168,70:216,95:263,120:307},F_vert_3:{2.5:22,4:30,6:38,10:52,16:70,25:89,35:110,50:134,70:171,95:208,120:240},G_just_3:{2.5:26,4:36,6:47,10:65,16:90,25:120,35:150,50:184,70:237,95:291,120:374},G_esp_3:{2.5:30,4:42,6:55,10:76,16:103,25:137,35:170,50:207,70:265,95:322,120:374}};
+
+var TEMP_AEREO={pvc:{10:1.22,15:1.17,20:1.12,25:1.06,30:1.00,35:0.94,40:0.87,45:0.79,50:0.71,55:0.61,60:0.50},xlpe:{10:1.15,15:1.12,20:1.08,25:1.04,30:1.00,35:0.96,40:0.91,45:0.87,50:0.82,55:0.76,60:0.71,65:0.65,70:0.58,75:0.50,80:0.41}};
+var TEMP_SOLO={pvc:{10:1.10,15:1.05,25:0.95,30:0.89,35:0.84,40:0.77,45:0.71,50:0.63,55:0.55,60:0.45},xlpe:{10:1.07,15:1.04,25:0.96,30:0.93,35:0.89,40:0.85,45:0.80,50:0.76,55:0.71,60:0.65,65:0.60,70:0.53,75:0.46,80:0.38}};
+var TAB42={1:{2:1.00,3:0.80,4:0.70,5:0.65,6:0.60,7:0.57,8:0.54,9:0.52,"10-11":0.50,"12-15":0.45,"16-19":0.41,"20+":0.38},2:{2:1.00,3:0.85,4:0.79,5:0.75,6:0.73,7:0.72,8:0.72,9:0.71,"10-11":0.70},3:{2:0.95,3:0.81,4:0.72,5:0.68,6:0.66,7:0.64,8:0.63,9:0.62},4:{2:1.00,3:0.88,4:0.82,5:0.77,6:0.75,7:0.73,8:0.73,9:0.72},5:{2:1.00,3:0.87,4:0.82,5:0.80,6:0.80,7:0.79,8:0.79,9:0.78}};
+function fatorAgrupamentoLinha(n,linha){var tab=TAB42[linha]||TAB42[1];if(n<=1)return 1;if(n<=9)return tab[n]||tab[9];if(n<=11)return tab["10-11"]||tab[9];if(n<=15)return tab["12-15"]||tab["10-11"]||tab[9];if(n<=19)return tab["16-19"]||tab["12-15"]||tab[9];return tab["20+"]||tab["16-19"]||tab[9]}
+var TAB43={2:{2:0.68,3:0.62,"4-5":0.60,"6-8":0.58,"9+":0.56},3:{2:0.62,3:0.57,"4-5":0.55,"6-8":0.53,"9+":0.51},"4-5":{2:0.60,3:0.55,"4-5":0.52,"6-8":0.51,"9+":0.49},"6-8":{2:0.58,3:0.53,"4-5":0.51,"6-8":0.49,"9+":0.48},"9+":{2:0.56,3:0.51,"4-5":0.49,"6-8":0.48,"9+":0.46}};
+function fatorAgrupamentoCamadas(nCarr,nCam){var nc="2";if(nCarr===3)nc="3";else if(nCarr<=5)nc="4-5";else if(nCarr<=8)nc="6-8";else nc="9+";var nl="2";if(nCam===2)nl="2";else if(nCam===3)nl="3";else if(nCam<=5)nl="4-5";else if(nCam<=8)nl="6-8";else nl="9+";return (TAB43[nl] && TAB43[nl][nc])||0.46}
+function getAmpacidade(metodo,isolacao,nCond,material){
+  var base=(isolacao==="pvc")?((material==="aluminio")?TB36_ALUM:TB36_COBRE):((material==="aluminio")?TB37_ALUM:TB37_COBRE);
+  if(metodo==="A1"||metodo==="A2"||metodo==="B1"||metodo==="B2"||metodo==="C"||metodo==="D"){return base[metodo+"_"+nCond]||base.B1_2}
+  var t=(isolacao==="pvc")?((material==="aluminio")?TB38_ALUM:TB38_COBRE):((material==="aluminio")?TB39_ALUM:TB39_COBRE);
+  if(metodo==="E") return t["E_"+nCond]||t.E_2;
+  if(metodo==="E-unip"||metodo==="F-just"||metodo==="F-trif") return t["F_"+nCond]||t.F_2;
+  if(metodo==="F-horiz") return t["F_horiz_"+nCond]||t.F_horiz_3;
+  if(metodo==="F-vert") return t["F_vert_"+nCond]||t.F_vert_3;
+  if(metodo==="G-just"||metodo==="G") return t["G_just_"+nCond]||t.G_just_3;
+  if(metodo==="G-esp") return t["G_esp_"+nCond]||t.G_esp_3;
+  return base.B1_2;
+}
+function fatorTemperatura(temp,iso,ambiente){var t=Number(temp);var tabela=(ambiente==="solo")?TEMP_SOLO:TEMP_AEREO;var faixa=(iso==="pvc")?tabela.pvc:tabela.xlpe;var chaves=Object.keys(faixa).map(Number).sort(function(a,b){return a-b});if(t<=chaves[0])return faixa[chaves[0]];for(var i=0;i<chaves.length-1;i++){if(t>=chaves[i]&&t<=chaves[i+1])return faixa[chaves[i]]}return faixa[chaves[chaves.length-1]]}
+function fatorAgrupamento(circuitos,metodo,linhaOverride,camadas){
+  if(linhaOverride && linhaOverride!=="" && linhaOverride!==null){
+    if(linhaOverride==="43" && camadas>=2) return fatorAgrupamentoCamadas(circuitos,camadas);
+    var l=Number(linhaOverride);
+    if(l>=1 && l<=5) return fatorAgrupamentoLinha(circuitos,l);
+  }
+  var mInfo=METODOS[metodo];var linhaPadrao=(mInfo && typeof mInfo.linha42==="number")?mInfo.linha42:1;
+  return fatorAgrupamentoLinha(circuitos,linhaPadrao);
+}
+
+var BIT=[1.5,2.5,4,6,10,16,25,35,50,70,95,120,150,185,240,300];
+var DISJ=[10,16,20,25,32,40,50,63,80,100,125,160,200,250,300,400];
+var RHO_PVC=1/56,RHO_XLPE=1/48,RHO_AL_PVC=1/35,RHO_AL_XLPE=1/32;
+
+function calcTrecho(t){
+  var P=n(t.potencia,0),U=n(t.tensao,220),L=n(t.comprimento,0),fp=n(t.fp,0.95)||0.95;
+  var fases=t.fases||"mono",cabo=t.cabo||"cobre",iso=t.isolacao||"pvc",metodo=t.metodo||"F-just";
+  var Ib;
+  if(fases==="tri"){Ib=(P*1000)/(Math.sqrt(3)*U*fp);}else{Ib=(P*1000)/(U*fp);}
+  var nC=(fases==="tri")?3:2;
+  var ambiente=t.ambiente||"";
+  if(!ambiente){var mInfo=METODOS[metodo];ambiente=(mInfo && mInfo.ambiente)||"aereo"}
+  var fA=fatorAgrupamento(n(t.circuitosAgrupados,1),metodo,t.linhaAgrupamento,n(t.camadasAgrupadas,1));
+  var fT=fatorTemperatura(t.tempAmb!=null?t.tempAmb:30,iso,ambiente);
+  var fTot=fA*fT;
+  var IzNec=Ib/fTot;
+  var rho=(cabo==="aluminio")?((iso==="pvc")?RHO_AL_PVC:RHO_AL_XLPE):((iso==="pvc")?RHO_PVC:RHO_XLPE);
+  var tab=getAmpacidade(metodo,iso,nC,cabo);
+  var bitAmp=null;
+  for(var i=0;i<BIT.length;i++){if(tab[String(BIT[i])]>=IzNec){bitAmp=BIT[i];break}}
+  if(!bitAmp)bitAmp=BIT[BIT.length-1];
+  var qm=n(t.quedaMax,4)||4;
+  var k=(fases==="tri")?173.2:200;
+  var Sq=(k*rho*L*Ib)/(qm*U);
+  var bitQ=BIT.find(function(b){return b>=Sq})||BIT[BIT.length-1];
+  var bit=Math.max(bitAmp,bitQ);
+  var IzT=tab[String(bit)];
+  var IzC=IzT*fTot;
+  var qEf=(k*rho*L*Ib)/(bit*U);
+  var dj=null;
+  for(var d=0;d<DISJ.length;d++){if(DISJ[d]>=Ib&&DISJ[d]<=IzC){dj=DISJ[d];break}}
+  if(!dj)dj=DISJ.find(function(x){return x>=Ib})||DISJ[DISJ.length-1];
+  return {Ib:Ib,fases:fases,fAgr:fA,fTemp:fT,fTotal:fTot,IzNec:IzNec,bitolaAmp:bitAmp,Squeda:Sq,bitolaQueda:bitQ,bitola:bit,IzTabela:IzT,IzCorrig:IzC,quedaEf:qEf,disjuntor:dj,rho:rho,k:k,comprimento:L,tensao:U,potencia:P,fp:fp,cabo:cabo,isolacao:iso,metodo:metodo,quedaMax:qm,circuitosAgrupados:n(t.circuitosAgrupados,1),tempAmb:t.tempAmb!=null?t.tempAmb:30,ambiente:ambiente,linhaAgrupamento:t.linhaAgrupamento||"",camadasAgrupadas:n(t.camadasAgrupadas,1)};
+}
+
+/* ============ ESTADO ============ */
+var SK="save-dimensiona-v42";
+var _mem={};
+var _ok=(function(){try{localStorage.setItem("__t","1");localStorage.removeItem("__t");return true}catch(e){return false}})();
+function sGet(k){if(_ok){try{return localStorage.getItem(k)}catch(e){}}return _mem[k]||null}
+function sSet(k,v){if(_ok){try{localStorage.setItem(k,v);return}catch(e){}}_mem[k]=v}
+function defaultState(){return {clientes:[],carregadores:[],veiculos:[],documentos:[],dimensionamentos:[],_seedAplicado:false}}
+function defaultDim(){return {id:null,nome:"",clienteId:"",criadoEm:null,somenteLeitura:false,step:1,
+  dados:{
+    responsavelTecnico:"",clienteId:"",tipoEdificacao:"",tipoGaragem:"",endereco:"",dataProjeto:"",
+    possuiVeiculo:"nao",veiculoId:"",necessidade:"",qtdVeiculos:1,
+    carregadores:[],
+    quadro:{tensao:"",fases:"",carga:"",fp:0.95,pctDemanda:100,djGeral:""},
+    conduto:{tipo:"eletrocalha",tipoCabo:"xlpe_sem_cob",larg:100,alt:50,dn:32}
+  },
+  resultado:null}}
+function migrarEstado(){var chaves=["save-dimensiona-v41","save-dimensiona-v40","save-dimensiona","save-dimensiona-v39","save-dimensiona-v38"];for(var i=0;i<chaves.length;i++){var raw=sGet(chaves[i]);if(raw){try{sSet(SK,raw);return JSON.parse(raw)}catch(e){}}}return null}
+function loadState(){try{var raw=sGet(SK);if(!raw){var mig=migrarEstado();if(mig)return Object.assign(defaultState(),mig);return defaultState()}var p=JSON.parse(raw);return Object.assign(defaultState(),p)}catch(e){return defaultState()}}
+function saveState(){try{sSet(SK,JSON.stringify(state))}catch(e){}}
+var state=loadState();
+var dim=defaultDim();
+var dimDirty=false;
+var carrSelecionado=null;
+
+function toast(m,v){var w=$("#toastWrap");if(!w)return;var el=document.createElement("div");el.className="toast"+(v==="danger"?" danger":v==="warn"?" warn":"");el.textContent=m;w.appendChild(el);setTimeout(function(){el.style.opacity="0";el.style.transition="opacity .25s";setTimeout(function(){el.remove()},260)},3600)}
+
+var FASES={mono:"Monofásico",bi:"Bifásico",tri:"Trifásico"};
+var FASES_SHORT={mono:"Mono",bi:"Bi",tri:"Tri"};
+var TIPO_LIG={FN:"Fase-Neutro",FF:"Fase-Fase"};
+var CONEC={tipo1:"Tipo 1",tipo2:"Tipo 2",ccs2:"CCS2",gbt:"GB/T",nacs:"NACS",chademo:"CHAdeMO"};
+var TIPO_EDIF={residencia:"Residência",edificio:"Edifício residencial",comercio:"Comércio",empresa:"Empresa"};
+var TIPO_GAR={interna:"Interna",externa:"Externa",subsolo:"Subsolo",coberta:"Coberta"};
+var TIPO_CABO={cobre:"Cobre",aluminio:"Alumínio"};
+
+/* ============ SCHEMAS ============ */
+var SCHEMAS={
+  cliente:{title:"cliente",fields:[
+    {key:"nome",label:"Nome / Razão social",type:"text",required:true,full:true},
+    {key:"documento",label:"CPF / CNPJ",type:"text",mask:"documento"},
+    {key:"tipoEdificacao",label:"Tipo de edificação",type:"select",required:true,options:[{value:"",label:"Selecione..."},{value:"residencia",label:"Residência"},{value:"edificio",label:"Edifício residencial"},{value:"comercio",label:"Comércio"},{value:"empresa",label:"Empresa"}]},
+    {key:"email",label:"E-mail",type:"email"},
+    {key:"telefone",label:"Telefone",type:"tel",mask:"telefone"},
+    {key:"cep",label:"CEP",type:"text",mask:"cep"},
+    {key:"rua",label:"Rua",type:"text",full:true},
+    {key:"numero",label:"Número",type:"text"},
+    {key:"complemento",label:"Complemento",type:"text"},
+    {key:"cidade",label:"Cidade",type:"text"},
+    {key:"uf",label:"UF",type:"text"}
+  ],listTitle:function(c){return c.nome||"(sem nome)"},listSub:function(c){return [TIPO_EDIF[c.tipoEdificacao]||"",[c.cidade,c.uf].filter(Boolean).join("/"),c.documento].filter(Boolean).join(" • ")},searchText:function(c){return [c.nome,c.documento,c.cidade,c.uf].filter(Boolean).join(" ").toLowerCase()}},
+  carregador:{title:"carregador",fields:[
+    {key:"apelido",label:"Apelido",type:"text",required:true,full:true},
+    {key:"clienteId",label:"Cliente vinculado",type:"select",optionsFrom:"clientes"},
+    {key:"fabricante",label:"Fabricante",type:"text"},
+    {key:"modelo",label:"Modelo",type:"text"},
+    {key:"potencia",label:"Potência nominal (kW)",type:"number",step:"0.1"},
+    {key:"fases",label:"Fases",type:"select",options:[{value:"",label:"Selecione..."},{value:"mono",label:"Monofásico"},{value:"bi",label:"Bifásico"},{value:"tri",label:"Trifásico"}]},
+    {key:"tensao",label:"Tensão",type:"select",options:[{value:"",label:"Selecione..."},{value:"127",label:"127 V"},{value:"220",label:"220 V"},{value:"380",label:"380 V"}]},
+    {key:"tipoLigacao",label:"Tipo de ligação",type:"select",options:[{value:"FN",label:"Fase-Neutro (F-N)"},{value:"FF",label:"Fase-Fase (F-F)"}]},
+    {key:"conector",label:"Conector",type:"select",options:[{value:"",label:"Selecione..."},{value:"tipo1",label:"Tipo 1"},{value:"tipo2",label:"Tipo 2"},{value:"ccs2",label:"CCS2"},{value:"gbt",label:"GB/T"},{value:"nacs",label:"NACS"}]},
+    {key:"corrente",label:"Corrente (A)",type:"number",step:"0.1"},
+    {key:"ocpp",label:"OCPP",type:"select",options:[{value:"",label:"Não possui"},{value:"ocpp16",label:"OCPP 1.6"},{value:"ocpp201",label:"OCPP 2.0.1"}]},
+    {key:"protecaoCC",label:"Proteção CC",type:"select",options:[{value:"nao",label:"Não"},{value:"sim",label:"Sim (DR Tipo B)"}]},
+    {key:"smartCharging",label:"Smart Charging",type:"select",options:[{value:"nao",label:"Não"},{value:"sim",label:"Sim"}]},
+    {key:"observacoes",label:"Observações",type:"textarea",full:true}
+  ],listTitle:function(c){return c.apelido||"(sem apelido)"},listSub:function(c){var desc=descreverLigacao(c.fases,c.tensao);var arr=c.potenciaPorTensao||inferirPotenciaPorTensao(c);var extra=(arr && arr.length>1)?" • "+arr.length+" tensões":"";return [c.fabricante,c.modelo,c.potencia?c.potencia+" kW":null,desc+extra].filter(Boolean).join(" • ")},searchText:function(c){return [c.apelido,c.fabricante,c.modelo].filter(Boolean).join(" ").toLowerCase()}},
+  veiculo:{title:"veículo",fields:[
+    {key:"apelido",label:"Apelido",type:"text",required:true,full:true},
+    {key:"clienteId",label:"Cliente vinculado",type:"select",optionsFrom:"clientes"},
+    {key:"marca",label:"Marca",type:"text"},
+    {key:"modelo",label:"Modelo",type:"text"},
+    {key:"ano",label:"Ano",type:"number"},
+    {key:"bateria",label:"Bateria (kWh)",type:"number",step:"0.1"},
+    {key:"potenciaMax",label:"Potência máx. (kW)",type:"number",step:"0.1"},
+    {key:"conector",label:"Conector",type:"select",options:[{value:"",label:"Selecione..."},{value:"tipo1",label:"Tipo 1"},{value:"tipo2",label:"Tipo 2"},{value:"ccs2",label:"CCS2"},{value:"nacs",label:"NACS"},{value:"chademo",label:"CHAdeMO"}]}
+  ],listTitle:function(v){return v.apelido||"(sem apelido)"},listSub:function(v){return [[v.marca,v.modelo].filter(Boolean).join(" "),v.ano,v.bateria?v.bateria+" kWh":null].filter(Boolean).join(" • ")},searchText:function(v){return [v.apelido,v.marca,v.modelo].filter(Boolean).join(" ").toLowerCase()}},
+  documento:{title:"documento",fields:[
+    {key:"nome",label:"Nome",type:"text",required:true,full:true},
+    {key:"clienteId",label:"Cliente",type:"select",optionsFrom:"clientes"},
+    {key:"tipo",label:"Tipo",type:"select",options:[{value:"",label:"Selecione..."},{value:"manual",label:"Manual"},{value:"foto",label:"Foto"},{value:"planta",label:"Planta"},{value:"relatorio",label:"Relatório"},{value:"outro",label:"Outro"}]},
+    {key:"link",label:"Link",type:"text",full:true},
+    {key:"observacoes",label:"Observações",type:"textarea",full:true}
+  ],listTitle:function(d){return d.nome||"(sem nome)"},listSub:function(d){return [d.tipo||"",d.link].filter(Boolean).join(" • ")},searchText:function(d){return [d.nome,d.tipo,d.link].filter(Boolean).join(" ").toLowerCase()}}
+};
+var LAB={cliente:"cliente",carregador:"carregador",veiculo:"veículo",documento:"documento"};
+var COLL={cliente:"clientes",carregador:"carregadores",veiculo:"veiculos",documento:"documentos"};
+
+/* ============ NAVEGAÇÃO ============ */
+var sidebar=$("#sidebar"),menuBtn=$("#menuButton"),ovl=$("#overlay");
+function closeMenu(){sidebar.classList.add("collapsed");ovl.classList.remove("open")}
+function openMenu(){sidebar.classList.remove("collapsed");if(window.innerWidth<720)ovl.classList.add("open")}
+menuBtn.addEventListener("click",function(){sidebar.classList.contains("collapsed")?openMenu():closeMenu()});
+ovl.addEventListener("click",closeMenu);
+function selectPage(name,force){
+  if(!force && dimDirty && name!=="dimensionamento"){
+    openConfirm({title:"Sair sem salvar?",message:"Há alterações não salvas no dimensionamento. Deseja sair mesmo assim?",okText:"Sair sem salvar",cancelText:"Continuar editando",variant:"warn"},function(ok){if(ok){dimDirty=false;selectPage(name,true)}});
+    return;
+  }
+  var p=document.getElementById("page-"+name),b=document.querySelector('.nav-item[data-page="'+name+'"]');
+  if(!p||!b)return;
+  $$(".page").forEach(function(x){x.classList.remove("active")});
+  $$(".nav-item").forEach(function(x){x.classList.remove("active")});
+  p.classList.add("active");b.classList.add("active");closeMenu();
+  window.scrollTo({top:0});
+  if(name==="dimensionamento"){renderStepper();carregarDim()}
+}
+$$(".nav-item[data-page]").forEach(function(b){b.addEventListener("click",function(){selectPage(b.dataset.page)})});
+$$("[data-open-page]").forEach(function(b){b.addEventListener("click",function(){selectPage(b.dataset.openPage)})});
+
+/* ============ LISTAS ============ */
+function emptyHTML(e){return '<div class="empty-state"><div class="empty-icon">◌</div><div class="empty-title">Nenhum '+(LAB[e]||"registro")+'</div><div class="empty-text">Toque em Adicionar.</div></div>'}
+function tagsCar(c){var t=[];if(c.ocpp)t.push('<span class="tag ocpp">'+c.ocpp+'</span>');if(c.fases)t.push('<span class="tag fase">'+FASES_SHORT[c.fases]+'</span>');if(c.tensao)t.push('<span class="tag tensao">'+c.tensao+'V</span>');if(c.protecaoCC==="sim")t.push('<span class="tag cc">Prot CC</span>');else t.push('<span class="tag nocc">Sem CC</span>');if(c.smartCharging==="sim")t.push('<span class="tag smart">Smart</span>');return t.length?'<div class="list-card-tags">'+t.join("")+'</div>':""}
+function cardHTML(e,item){var s=SCHEMAS[e];var sub=s.listSub(item)||"";var tags=e==="carregador"?tagsCar(item):"";return '<div class="list-card" data-id="'+item.id+'" data-entity="'+e+'" data-clickable="true"><div class="list-card-main"><div class="list-card-title">'+esc(s.listTitle(item))+'</div>'+(sub?'<div class="list-card-sub">'+esc(sub)+'</div>':'')+tags+'</div><div class="list-card-actions"><button class="icon-btn" type="button" data-action="edit" data-entity="'+e+'" data-id="'+item.id+'">✎</button><button class="icon-btn danger" type="button" data-action="delete" data-entity="'+e+'" data-id="'+item.id+'">🗑</button></div></div>'}
+function renderList(e,filter){filter=filter||"";var c=COLL[e],le=document.getElementById("list-"+c),ce=document.getElementById("count-"+c),s=SCHEMAS[e];if(!le||!ce)return;var all=state[c]||[];var q=filter.trim().toLowerCase();var f=q?all.filter(function(i){return s.searchText(i).indexOf(q)>-1}):all;ce.textContent=all.length+" registros";if(!all.length){le.innerHTML=emptyHTML(e);return}if(!f.length){le.innerHTML='<div class="empty-state"><div class="empty-icon">⌕</div><div class="empty-title">Nada encontrado</div></div>';return}le.innerHTML=f.map(function(i){return cardHTML(e,i)}).join("")}
+function renderDash(){var a=$("#dash-clientes"),b=$("#dash-carregadores"),c=$("#dash-veiculos"),d=$("#dash-dimensionamentos");if(a)a.textContent=state.clientes.length;if(b)b.textContent=state.carregadores.length;if(c)c.textContent=state.veiculos.length;if(d)d.textContent=state.dimensionamentos.length}
+function renderAll(){renderList("cliente");renderList("carregador");renderList("veiculo");renderList("documento");renderDash()}
+function optsColl(c,ph){ph=ph||"— Nenhum —";var items=state[c]||[];if(!items.length)return '<option value="">(nenhum)</option>';return '<option value="">'+ph+'</option>'+items.map(function(i){return '<option value="'+i.id+'">'+esc(i.nome||i.apelido||i.id)+'</option>'}).join("")}
+
+/* ============ MODAL ============ */
+var modalBack=$("#modalBackdrop"),modalBox=$("#modalBox"),modalTitle=$("#modalTitle"),modalBody=$("#modalBody"),modalClose=$("#modalClose"),modalCancel=$("#modalCancel"),modalSubmit=$("#modalSubmit");
+var curEnt=null,curId=null,dirtyModal=false,readonly=false,customAct=null;
+
+function buildField(f,v,ro){
+  var id="f_"+f.key,req=f.required?" required":"",fc=f.full?" full":"",dis=ro?" disabled":"";
+  var lbl='<label class="form-label" for="'+id+'">'+esc(f.label)+(f.required?' <span class="req">*</span>':'')+'</label>';
+  var val=v==null?"":v;
+  if(f.type==="select"){var o="";if(f.optionsFrom)o=optsColl(f.optionsFrom);else o=f.options.map(function(x){return '<option value="'+esc(x.value)+'"'+(String(x.value)===String(val)?" selected":"")+'>'+esc(x.label)+'</option>'}).join("");return '<div class="form-field'+fc+'">'+lbl+'<select class="form-select" id="'+id+'" name="'+f.key+'"'+req+dis+'>'+o+'</select></div>'}
+  if(f.type==="textarea")return '<div class="form-field'+fc+'">'+lbl+'<textarea class="form-textarea" id="'+id+'" name="'+f.key+'"'+req+dis+'>'+esc(val)+'</textarea></div>';
+  var ex=f.step?' step="'+f.step+'"':"",mk=f.mask?' data-mask="'+f.mask+'"':"";
+  return '<div class="form-field'+fc+'">'+lbl+'<input class="form-input" id="'+id+'" name="'+f.key+'" type="'+f.type+'"'+ex+' value="'+esc(val)+'"'+req+mk+dis+'></div>';
+}
+function rowPotTensao(p,ro){var dis=ro?" disabled":"";var btn=ro?'':'<button type="button" data-ppt-del="1">🗑</button>';return '<div class="pot-tensao-row"><select data-ppt-tensao="1"'+dis+'><option value="127"'+(Number(p.tensao)===127?" selected":"")+'>127 V</option><option value="220"'+(Number(p.tensao)===220?" selected":"")+'>220 V</option><option value="380"'+(Number(p.tensao)===380?" selected":"")+'>380 V</option></select><select data-ppt-fases="1"'+dis+'><option value="mono"'+(p.fases==="mono"?" selected":"")+'>Mono</option><option value="bi"'+(p.fases==="bi"?" selected":"")+'>Bi</option><option value="tri"'+(p.fases==="tri"?" selected":"")+'>Tri</option></select><select data-ppt-tipo="1"'+dis+'><option value="FN"'+(p.tipoLigacao==="FN"?" selected":"")+'>F-N</option><option value="FF"'+(p.tipoLigacao==="FF"?" selected":"")+'>F-F</option></select><input type="number" step="0.1" min="0" data-ppt-pot="1" value="'+(p.potencia||"")+'" placeholder="kW"'+dis+'>'+btn+'</div>'}
+function renderModalBody(item){
+  var s=SCHEMAS[curEnt];if(!s){modalBody.innerHTML="";return}
+  modalBody.innerHTML='<div class="form-grid">'+s.fields.map(function(f){return buildField(f,item?item[f.key]:null,readonly)}).join("")+'</div>';
+  if(curEnt==="carregador" && !readonly){
+    var avisoEl=document.createElement("div");avisoEl.id="avisoLigacao";avisoEl.style.marginTop="10px";modalBody.appendChild(avisoEl);
+    var selFases=$("#f_fases"),selTensao=$("#f_tensao"),selTipo=$("#f_tipoLigacao");
+    function atualizarAviso(){var fases=selFases?selFases.value:"",tensao=selTensao?selTensao.value:"";if(!fases||!tensao){avisoEl.innerHTML="";return}var desc=descreverLigacao(fases,Number(tensao));var extra="";var cls="";if(fases==="tri" && Number(tensao)===220){cls="warn";extra=" • <strong>Atenção:</strong> sistema 127/220 V trifásico fase-fase"}if(fases==="bi" && Number(tensao)===220){extra=" • Duas fases de 127 V, 220 V entre fases"}avisoEl.innerHTML='<div class="aviso-visual '+cls+'"><span>ⓘ</span><span><strong>'+esc(desc)+'</strong>'+extra+'</span></div>'}
+    if(selFases)selFases.addEventListener("change",atualizarAviso);
+    if(selTensao)selTensao.addEventListener("change",atualizarAviso);
+    if(selTipo)selTipo.addEventListener("change",atualizarAviso);
+    atualizarAviso();
+  }
+  if(curEnt==="carregador"){
+    var bloco=document.createElement("div");
+    bloco.innerHTML='<div class="form-field full" style="margin-top:8px"><label class="form-label">Potência por tensão (opcional mas recomendado)</label><div style="font-size:11.5px;color:var(--muted);margin-bottom:8px;line-height:1.5">Cadastre a potência real que o carregador entrega em cada tensão.</div><div id="pptList"></div>'+(readonly?'':'<button type="button" class="btn-secondary" id="pptAdd" style="margin-top:6px;font-size:12px;min-height:36px;padding:6px 12px">＋ Adicionar tensão</button>')+'</div>';
+    modalBody.appendChild(bloco);
+    var list=$("#pptList");
+    function renderListaPPT(){var arr=(item&&item.potenciaPorTensao)?item.potenciaPorTensao:[];if(!arr.length){list.innerHTML='<div style="color:var(--muted);font-size:11.5px;padding:8px 0">Nenhuma tensão específica cadastrada.</div>';return}list.innerHTML=arr.map(function(p){return rowPotTensao(p,readonly)}).join("");if(!readonly){$$("#pptList [data-ppt-del]").forEach(function(b){b.addEventListener("click",function(){var idx=Array.prototype.indexOf.call(list.children,b.closest(".pot-tensao-row"));arr.splice(idx,1);renderListaPPT()})})}}
+    renderListaPPT();
+    if(!readonly){var btnAdd=$("#pptAdd");if(btnAdd)btnAdd.addEventListener("click",function(){if(!item)item={potenciaPorTensao:[]};if(!item.potenciaPorTensao)item.potenciaPorTensao=[];item.potenciaPorTensao.push({tensao:220,fases:"mono",tipoLigacao:"FN",potencia:0});renderListaPPT()})}
+  }
+  if(!readonly){$$("input[data-mask]",modalBody).forEach(function(inp){inp.addEventListener("input",function(){var k=inp.dataset.mask;if(k==="documento")inp.value=maskDoc(inp.value);if(k==="cep")inp.value=maskCEP(inp.value);if(k==="telefone")inp.value=maskTel(inp.value)})})}
+  $$("input,select,textarea",modalBody).forEach(function(el){el.addEventListener("input",function(){dirtyModal=true});el.addEventListener("change",function(){dirtyModal=true})});
+}
+function setupSubmit(){if(customAct){modalSubmit.textContent="Aplicar";modalSubmit.classList.remove("btn-secondary");modalSubmit.classList.add("primary-button");return}if(readonly&&curId){modalSubmit.textContent="✎ Editar";modalSubmit.classList.remove("primary-button");modalSubmit.classList.add("btn-secondary")}else{modalSubmit.textContent=curId?"Salvar alterações":"Salvar";modalSubmit.classList.remove("btn-secondary");modalSubmit.classList.add("primary-button")}}
+function openModal(e,id,forceEdit){try{customAct=null;curEnt=e;curId=id||null;dirtyModal=false;readonly=!!id&&!forceEdit;var s=SCHEMAS[e],c=COLL[e];if(!s||!c){toast("Entidade inválida","danger");return}var item=id?state[c].find(function(i){return i.id===id}):null;modalTitle.textContent=(id?"Detalhes do ":"Novo ")+s.title;modalBox.classList.remove("large");modalCancel.textContent="Cancelar";renderModalBody(item);setupSubmit();modalBack.classList.add("open");document.body.style.overflow="hidden";setTimeout(function(){var f=modalBody.querySelector("input:not([disabled]),select:not([disabled]),textarea:not([disabled])");if(f)f.focus()},100)}catch(err){console.error(err);toast("Erro ao abrir","danger")}}
+function closeModal(){if(dirtyModal&&!readonly){openConfirm({title:"Descartar alterações?",message:"Sair sem salvar?",okText:"Descartar",cancelText:"Continuar",variant:"warn"},function(ok){if(ok)forceClose()})}else forceClose()}
+function forceClose(){modalBack.classList.remove("open");if(!cBack.classList.contains("open"))document.body.style.overflow="";curEnt=null;curId=null;dirtyModal=false;readonly=false;customAct=null}
+modalClose.addEventListener("click",closeModal);
+modalCancel.addEventListener("click",closeModal);
+modalBack.addEventListener("click",function(e){if(e.target===modalBack)closeModal()});
+modalSubmit.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();try{if(customAct==="painelCliente"){var cid=curId;dim=defaultDim();dim.dados.clienteId=cid;dim.step=1;dimDirty=false;dim.somenteLeitura=false;carrSelecionado=null;forceClose();selectPage("dimensionamento",true);renderStepper();carregarDim();atualizarModoLeitura();toast("Novo dimensionamento.");return}if(readonly&&curId&&curEnt){readonly=false;var c=COLL[curEnt],it=state[c].find(function(i){return i.id===curId});renderModalBody(it);setupSubmit();var first=modalBody.querySelector("input:not([disabled]),select:not([disabled]),textarea:not([disabled])");if(first)first.focus();return}executarSalvar()}catch(err){console.error(err);toast("Erro ao processar","danger")}});
+
+function coletarPotenciaPorTensao(){var arr=[];$$("#pptList .pot-tensao-row").forEach(function(row){var t=row.querySelector("[data-ppt-tensao]").value;var f=row.querySelector("[data-ppt-fases]").value;var tipo=row.querySelector("[data-ppt-tipo]").value;var p=row.querySelector("[data-ppt-pot]").value;if(p!=="") arr.push({tensao:Number(t),fases:f,tipoLigacao:tipo,potencia:Number(p)})});return arr}
+function executarSalvar(){
+  if(!curEnt||!SCHEMAS[curEnt]){toast("Nenhuma entidade","danger");return}
+  var s=SCHEMAS[curEnt],c=COLL[curEnt],data={};
+  s.fields.forEach(function(f){var el=modalBody.querySelector('[name="'+f.key+'"]');if(!el)return;var v=el.value!=null?el.value.trim():"";if(f.type==="number"&&v!=="")v=Number(v);data[f.key]=v});
+  if(curEnt==="carregador"){data.potenciaPorTensao=coletarPotenciaPorTensao()}
+  for(var i=0;i<s.fields.length;i++){var f=s.fields[i];if(f.required&&(data[f.key]===""||data[f.key]==null)){toast("Preencha: "+f.label,"danger");return}}
+  if(data.documento){var d=digits(data.documento);if(d.length===11&&!isValidCPF(d)){toast("CPF inválido","danger");return}if(d.length===14&&!isValidCNPJ(d)){toast("CNPJ inválido","danger");return}}
+  var isEdit=!!curId,ent=curEnt,id=curId;
+  openConfirm({title:isEdit?"Salvar alterações?":"Confirmar cadastro?",message:isEdit?'Salvar "'+s.listTitle(data)+'"':'Cadastrar "'+s.listTitle(data)+'"?',okText:isEdit?"Salvar":"Cadastrar",cancelText:"Cancelar",variant:"info"},function(ok){
+    if(!ok)return;
+    try{
+      if(id){var i=state[c].findIndex(function(x){return x.id===id});if(i>-1)state[c][i]=Object.assign({},state[c][i],data);toast(cap(s.title)+" atualizado.")}
+      else{state[c].push(Object.assign({id:uid()},data,{criadoEm:new Date().toISOString()}));toast(cap(s.title)+" cadastrado.")}
+      saveState();renderList(ent);renderDash();
+      if(ent==="cliente"){repopularClientes()}
+      dirtyModal=false;modalBack.classList.remove("open");
+      if(!cBack.classList.contains("open"))document.body.style.overflow="";
+      curEnt=null;curId=null;readonly=false;customAct=null;
+    }catch(err2){console.error(err2);toast("Erro ao gravar","danger")}
+  });
+}
+
+document.addEventListener("click",function(e){
+  if(e.target.closest("#modalBackdrop")||e.target.closest("#confirmBackdrop"))return;
+  var a=e.target.closest("[data-add]");if(a){openModal(a.dataset.add,null);return}
+  var act=e.target.closest("[data-action]");
+  if(act){
+    var ac=act.dataset.action,en=act.dataset.entity,id=act.dataset.id,c=COLL[en];if(!c)return;
+    if(ac==="edit"){openModal(en,id,true);return}
+    if(ac==="delete"){
+      var it=state[c].find(function(i){return i.id===id});if(!it)return;
+      openConfirm({title:"Excluir registro?",message:'Excluir "'+SCHEMAS[en].listTitle(it)+'"?',okText:"Excluir",cancelText:"Cancelar",variant:"danger"},function(ok){
+        if(!ok)return;state[c]=state[c].filter(function(i){return i.id!==id});saveState();renderList(en);renderDash();
+        if(en==="cliente"){repopularClientes()}
+        toast(cap(SCHEMAS[en].title)+" excluído.","danger");
+      });
+      return;
+    }
+  }
+  var clk=e.target.closest("[data-clickable]");
+  if(clk){var en2=clk.dataset.entity,id2=clk.dataset.id;if(en2==="cliente"){abrirPainelCliente(id2);return}openModal(en2,id2);return}
+});
+function setupSearch(e){var c=COLL[e],inp=document.getElementById("search-"+c),dd=document.getElementById("dropdown-"+c);if(!inp||!dd)return;var s=SCHEMAS[e];function close(){dd.classList.remove("open")}function open(){var q=inp.value.trim().toLowerCase();if(!q){close();return}var all=state[c]||[];var m=all.filter(function(i){return s.searchText(i).indexOf(q)>-1}).slice(0,8);dd.innerHTML=m.length?m.map(function(i){return '<button class="search-item" data-pick="'+i.id+'">'+esc(s.listTitle(i))+'</button>'}).join(""):'<div class="search-empty">Nada.</div>';dd.classList.add("open")}inp.addEventListener("input",function(){renderList(e,inp.value);open()});inp.addEventListener("focus",open);dd.addEventListener("click",function(ev){var p=ev.target.closest("[data-pick]");if(!p)return;var entity=e;if(entity==="cliente"){abrirPainelCliente(p.dataset.pick)}else{openModal(entity,p.dataset.pick)}close()});document.addEventListener("click",function(ev){if(!inp.contains(ev.target)&&!dd.contains(ev.target))close()})}
+["cliente","carregador","veiculo","documento"].forEach(setupSearch);
+$("#btnSeedData").addEventListener("click",function(){
+  openConfirm({title:"Repor banco de dados?",message:"Serão adicionados "+SEED_CARREGADORES.length+" carregadores e "+SEED_VEICULOS.length+" veículos.",okText:"Adicionar",cancelText:"Cancelar",variant:"info"},function(ok){
+    if(!ok)return;var aC=0,aV=0;
+    SEED_CARREGADORES.forEach(function(c){if(!state.carregadores.find(function(x){return x.apelido===c.apelido})){state.carregadores.push(Object.assign({id:uid(),criadoEm:new Date().toISOString(),clienteId:""},c));aC++}});
+    SEED_VEICULOS.forEach(function(v){if(!state.veiculos.find(function(x){return x.apelido===v.apelido})){state.veiculos.push(Object.assign({id:uid(),criadoEm:new Date().toISOString(),clienteId:""},v));aV++}});
+    saveState();renderAll();toast("Adicionados: "+aC+" carregadores, "+aV+" veículos.");
+  });
+});
+function compatCon(cc,vc){if(!cc||!vc)return{ok:true};if(cc===vc)return{ok:true};var map={tipo1:["tipo1"],tipo2:["tipo2","ccs2"],ccs2:["tipo2","ccs2"],gbt:["gbt"],nacs:["nacs","tipo2"],chademo:["chademo"]};return (map[cc]||[]).indexOf(vc)>-1?{ok:true}:{ok:false}}
+function fmtTempo(h){if(!h||!isFinite(h))return "—";var hi=Math.floor(h),mi=Math.round((h-hi)*60);if(mi===60){hi++;mi=0}if(hi===0)return mi+" min";if(mi===0)return hi+"h";return hi+"h "+mi+"min"}
+
+/* ============ DIMENSIONAMENTO ============ */
+function marcarDirty(){if(!dim.somenteLeitura)dimDirty=true}
+function repopularClientes(){var sel=$("#d_cliente");if(!sel)return;var atual=dim.dados.clienteId;if(!state.clientes.length){sel.innerHTML='<option value="">(nenhum cliente)</option>';return}sel.innerHTML='<option value="">— Selecione —</option>'+state.clientes.map(function(c){return '<option value="'+c.id+'">'+esc(c.nome)+'</option>'}).join("");if(state.clientes.some(function(c){return c.id===atual}))sel.value=atual}
+function atualizarInfoCliente(){var info=$("#d_cliente-info");if(!info)return;var cl=state.clientes.find(function(c){return c.id===dim.dados.clienteId});if(!cl){info.textContent="";return}info.textContent=[cl.documento,cl.telefone,cl.email,[cl.cidade,cl.uf].filter(Boolean).join("/")].filter(Boolean).join(" • ")}
+function importarDadosCliente(){var cl=state.clientes.find(function(c){return c.id===dim.dados.clienteId});if(!cl)return;if(cl.tipoEdificacao)dim.dados.tipoEdificacao=cl.tipoEdificacao;var end=[];if(cl.rua)end.push(cl.rua);if(cl.numero)end.push(cl.numero);if(cl.complemento)end.push(cl.complemento);if(cl.cidade)end.push(cl.cidade);if(cl.uf)end.push(cl.uf);if(end.length)dim.dados.endereco=end.join(", ");carregarDim()}
+function carregarDim(){
+  var d=dim.dados;var r=$("#d_responsavel");if(r)r.value=d.responsavelTecnico||"";
+  repopularClientes();atualizarInfoCliente();
+  var map1={d_tipoEdif:"tipoEdificacao",d_tipoGaragem:"tipoGaragem",d_endereco:"endereco",d_data:"dataProjeto"};
+  Object.keys(map1).forEach(function(id){var el=document.getElementById(id);if(el)el.value=d[map1[id]]||""});
+  var pv=$("#d_possuiVeiculo");if(pv)pv.value=d.possuiVeiculo||"nao";
+  var map2={d_necessidade:"necessidade",d_qtdVeiculos:"qtdVeiculos"};
+  Object.keys(map2).forEach(function(id){var el=document.getElementById(id);if(el)el.value=d[map2[id]]||""});
+  if(!d.quadro)d.quadro={};
+  var mapq={d_qd_tensao:"tensao",d_qd_fases:"fases",d_qd_carga:"carga",d_qd_fp:"fp",d_qd_pctDemanda:"pctDemanda",d_qd_djGeral:"djGeral"};
+  Object.keys(mapq).forEach(function(id){var el=document.getElementById(id);if(!el)return;var v=d.quadro[mapq[id]];el.value=(v!=null&&v!=="")?v:""});
+  var q4=$("#d_qd_fp");if(q4&&!q4.value)q4.value=0.95;
+  var q5=$("#d_qd_pctDemanda");if(q5&&!q5.value)q5.value=100;
+  toggleVeiculo();popularVeiculos();popularCarrsDim();renderPreviewCarr();renderCarrsProj();renderCarrBtns();renderTrechoForm();renderAvisoRede();
+  popularCondutoSelects();
+  aplicarModoLeitura();
+}
+function renderAvisoRede(){var el=$("#d_aviso-rede");if(!el)return;var qd=dim.dados.quadro||{};var tensao=qd.tensao,fases=qd.fases;if(!tensao||!fases){el.innerHTML='<div class="aviso-visual warn"><span>⚠️</span><span><strong>Preencha tensão e fases do quadro</strong> para o app calcular a potência real de cada carregador.</span></div>';return}var desc=descreverLigacao(fases,Number(tensao));var extra="";if(fases==="tri"&&Number(tensao)===220){extra=" • O app vai usar <strong>12,7 kW</strong> para carregadores de 22 kW (não 22 kW)."}if(fases==="tri"&&Number(tensao)===380){extra=" • Os carregadores de 22 kW entregam potência cheia em 380 V tri."}el.innerHTML='<div class="aviso-visual"><span>ⓘ</span><span><strong>Rede: '+esc(desc)+'</strong>'+extra+'</span></div>'}
+function toggleVeiculo(){var v=$("#d_possuiVeiculo").value;var w=$("#dim-wrap-veiculo");if(w)w.hidden=(v!=="sim")}
+function popularVeiculos(){var sel=$("#d_veiculo");if(!sel)return;var lista=state.veiculos||[];var b=($("#d_veiculoBusca")||{}).value||"";b=b.trim().toLowerCase();if(b)lista=lista.filter(function(v){return [v.apelido,v.marca,v.modelo].filter(Boolean).join(" ").toLowerCase().indexOf(b)>-1});sel.innerHTML=(lista.length?'<option value="">— Selecione —</option>':'<option value="">(nenhum)</option>')+lista.map(function(v){return '<option value="'+v.id+'"'+(v.id===dim.dados.veiculoId?" selected":"")+'>'+esc(v.apelido)+'</option>'}).join("")}
+function autoPreencherNecessidade(){var v=state.veiculos.find(function(x){return x.id===dim.dados.veiculoId});if(!v)return;var pm=n(v.potenciaMax,0);var nec=pm<=7.4?"lenta":pm<=22?"media":"rapida";dim.dados.necessidade=nec;var sel=$("#d_necessidade");if(sel)sel.value=nec;var w=$("#d_tempo-estimado-wrap"),t=$("#d_tempo-estimado");if(v.bateria&&w&&t){var pr=Math.min(nec==="lenta"?7:nec==="media"?11:22,pm||22);var h100=n(v.bateria,0)/(pr*0.9);t.innerHTML="Tempo estimado com "+pr+" kW: <strong>0–80%: "+fmtTempo(h100*0.8)+"</strong> · 0–100%: "+fmtTempo(h100);w.hidden=false}else if(w){w.hidden=true}}
+function popularCarrsDim(){
+  var sel=$("#d_addCarregador");if(!sel)return;
+  var d=dim.dados;var lista=[];var veic=state.veiculos.find(function(v){return v.id===d.veiculoId});
+  var usaFiltro=(d.possuiVeiculo==="sim"&&veic);
+  state.carregadores.forEach(function(c){if(usaFiltro){var cp=compatCon(c.conector||"",veic.conector||"");var potOK=true;if(d.necessidade){var fx={lenta:[0,7.4],media:[7.5,22],rapida:[22.1,999]}[d.necessidade];potOK=n(c.potencia,0)>=fx[0]&&n(c.potencia,0)<=fx[1]}if(!cp.ok||!potOK)return}lista.push(c)});
+  var b=($("#d_carrBusca")||{}).value||"";b=b.trim().toLowerCase();
+  if(b)lista=lista.filter(function(c){return [c.apelido,c.fabricante,c.modelo].filter(Boolean).join(" ").toLowerCase().indexOf(b)>-1});
+  if(!lista.length)sel.innerHTML='<option value="">(nenhum compatível)</option>';
+  else sel.innerHTML='<option value="">— Selecione —</option>'+lista.map(function(c){var lig=descreverLigacao(c.fases,c.tensao);var ext=[c.fabricante,c.potencia?c.potencia+" kW":null,lig].filter(Boolean).join(" · ");return '<option value="'+c.id+'">'+esc(c.apelido)+" — "+ext+'</option>'}).join("");
+  var info=$("#d_info-filtro");if(info){if(usaFiltro&&veic)info.textContent="Exibindo "+lista.length+" carregador(es) compatível(is) com "+veic.apelido+".";else info.textContent=""}
+  renderPreviewCarr();
+}
+function renderPreviewCarr(){
+  var box=$("#d_carrPreview");if(!box)return;
+  var sel=$("#d_addCarregador");if(!sel||!sel.value){box.innerHTML="";return}
+  var c=state.carregadores.find(function(x){return x.id===sel.value});if(!c){box.innerHTML="";return}
+  var cl=state.clientes.find(function(x){return x.id===c.clienteId});
+  var lig=descreverLigacao(c.fases,c.tensao);
+  var qd=dim.dados.quadro||{};var tensaoRede=n(qd.tensao,0)||null;var fasesRede=qd.fases||null;
+  var tipoLigRede=(fasesRede==="mono")?"FN":"FF";
+  var rows=[["Apelido",c.apelido],["Fabricante",c.fabricante],["Modelo",c.modelo],["Potência nominal",c.potencia?c.potencia+" kW":null],["Ligação nominal",lig],["Conector",c.conector?CONEC[c.conector]:null],["OCPP",c.ocpp||null],["Proteção CC",c.protecaoCC==="sim"?"Sim (DR Tipo B)":"Não"],["Smart Charging",c.smartCharging==="sim"?"Sim":"Não"],["Cliente",cl?cl.nome:null],["Observações",c.observacoes]].filter(function(r){return r[1]});
+  var tags=[];if(c.protecaoCC==="sim")tags.push('<span class="tag cc">Proteção CC</span>');else tags.push('<span class="tag nocc">Sem prot CC</span>');if(c.smartCharging==="sim")tags.push('<span class="tag smart">Smart</span>');if(c.ocpp)tags.push('<span class="tag ocpp">'+c.ocpp+'</span>');if(c.fases)tags.push('<span class="tag fase">'+FASES_SHORT[c.fases]+'</span>');if(c.tensao)tags.push('<span class="tag tensao">'+c.tensao+'V</span>');
+  var avisoExtra="";
+  if(tensaoRede && fasesRede){var res=potenciaParaTensao(c,tensaoRede,fasesRede,tipoLigRede);var pNom=n(c.potencia,0);if(res.encontrado && Math.abs(res.potencia-pNom)>0.05){var cls=(fasesRede==="tri"&&tensaoRede===220)?"warn":"";avisoExtra='<div class="aviso-visual '+cls+'"><span>⚠️</span><span><strong>Atenção:</strong> Na rede <strong>'+esc(descreverLigacao(fasesRede,tensaoRede))+'</strong>, este carregador entrega <strong>'+res.potencia.toFixed(2)+' kW</strong>, não '+pNom.toFixed(2)+' kW.</span></div>'}else if(!res.encontrado){avisoExtra='<div class="aviso-visual warn"><span>⚠️</span><span>Este carregador não tem tabela de potência para <strong>'+esc(descreverLigacao(fasesRede,tensaoRede))+'</strong>.</span></div>'}}else{avisoExtra='<div class="aviso-visual warn"><span>ⓘ</span><span>Preencha <strong>tensão e fases do quadro</strong> (etapa 3) para ver a potência real.</span></div>'}
+  var tabelaPPT="";
+  var arrPPT=c.potenciaPorTensao||inferirPotenciaPorTensao(c);
+  if(arrPPT && arrPPT.length){tabelaPPT='<div style="margin-top:14px"><div style="font-size:11px;font-weight:650;color:var(--muted);text-transform:uppercase;margin-bottom:6px">Potência em cada tensão</div><table class="pot-tensao-table"><thead><tr><th>Tensão</th><th>Fases</th><th>Tipo</th><th>Potência</th></tr></thead><tbody>'+arrPPT.map(function(p){var isRede=(tensaoRede && fasesRede && Number(p.tensao)===tensaoRede && p.fases===fasesRede);var bg=isRede?' style="background:rgba(41,211,165,.08)"':'';return '<tr'+bg+'><td>'+p.tensao+' V'+(isRede?' ← sua rede':'')+'</td><td>'+FASES_SHORT[p.fases]+'</td><td>'+TIPO_LIG[p.tipoLigacao||"FF"]+'</td><td><strong>'+Number(p.potencia).toFixed(2)+' kW</strong></td></tr>'}).join("")+'</tbody></table></div>'}
+  box.innerHTML='<div class="trecho-card preview-panel"><div class="trecho-header"><div class="trecho-title">Pré-visualização</div><div style="display:flex;gap:5px;flex-wrap:wrap">'+tags.join("")+'</div></div><div class="form-grid" style="grid-template-columns:1fr">'+rows.map(function(r){return '<div class="form-field"><label class="form-label">'+esc(r[0])+'</label><div style="font-size:13px;color:var(--text)">'+esc(r[1])+'</div></div>'}).join("")+'</div>'+avisoExtra+tabelaPPT+'</div>';
+}
+function renderCarrsProj(){
+  var cont=$("#d_carrList");if(!cont)return;
+  var lista=dim.dados.carregadores||[];
+  if(!lista.length){cont.innerHTML='<div class="empty-state"><div class="empty-title">Nenhum carregador adicionado</div></div>';return}
+  cont.innerHTML=lista.map(function(c,i){
+    var qtd=lista.length;
+    var lig=descreverLigacao(c.fases,c.tensao);
+    var meta=[c.potencia?c.potencia+" kW":null,lig,c.conector?CONEC[c.conector]:null].filter(Boolean).join(" • ");
+    var nTrechos=(c.trechos||[]).length;
+    var statusTag=nTrechos?'<span class="tag smart">'+nTrechos+' trecho'+(nTrechos>1?'s':'')+'</span>':'<span class="tag nocc">Sem trecho</span>';
+    return '<div class="carr-etapa2-item"><div class="info"><div class="name">Carregador '+(i+1)+' de '+qtd+' — '+esc(c.apelido||"")+'</div><div class="meta">'+esc(meta)+'</div><div class="tags">'+statusTag+'</div></div><div style="display:flex;gap:6px"><button class="icon-btn danger" type="button" data-del-carr="'+i+'">🗑</button></div></div>';
+  }).join("");
+  $$("#d_carrList [data-del-carr]").forEach(function(b){b.addEventListener("click",function(){var i=Number(b.dataset.delCarr);openConfirm({title:"Excluir?",message:"Remover do projeto?",okText:"Excluir",cancelText:"Cancelar",variant:"danger"},function(ok){if(!ok)return;dim.dados.carregadores.splice(i,1);marcarDirty();saveState();renderCarrsProj();renderCarrBtns();renderTrechoForm()})})});
+}
+
+/* ============ ABA 3: BOTÕES POR CARREGADOR ============ */
+function renderCarrBtns(){
+  var el=$("#d_carrBtns");if(!el)return;
+  var lista=dim.dados.carregadores||[];
+  if(!lista.length){el.innerHTML='<div class="empty-state"><div class="empty-title">Nenhum carregador adicionado</div><div class="empty-text">Volte ao passo 2 para adicionar.</div></div>';return}
+  el.innerHTML=lista.map(function(c,i){
+    var nTrechos=(c.trechos||[]).length;
+    var badge=nTrechos?'<div class="ct-badge ok">✓ '+nTrechos+' trecho'+(nTrechos>1?'s':'')+'</div>':'<div class="ct-badge pending">! Sem trecho</div>';
+    var cls=(carrSelecionado===i)?" selected":"";
+    return '<button class="carr-btn'+cls+'" type="button" data-carrbtn="'+i+'"><div class="ct-name">Carregador '+(i+1)+'/'+lista.length+'</div><div class="ct-meta">'+esc(c.apelido||"")+'</div>'+badge+'</button>';
+  }).join("");
+  $$("[data-carrbtn]").forEach(function(b){b.addEventListener("click",function(){
+    carrSelecionado=Number(b.dataset.carrbtn);
+    renderCarrBtns();
+    renderTrechoForm();
+  })});
+}
+
+function renderTrechoForm(){
+  var el=$("#d_trechoForm");if(!el)return;
+  if(carrSelecionado==null || !dim.dados.carregadores[carrSelecionado]){el.innerHTML="";return}
+  var c=dim.dados.carregadores[carrSelecionado];
+  if(!c.trechos)c.trechos=[];
+  var nT=c.trechos.length;
+  var html='<div class="section-panel" style="margin-top:0">';
+  html+='<div class="trecho-list-header"><div class="tl-title">Trechos do carregador '+(carrSelecionado+1)+'/'+dim.dados.carregadores.length+' — '+esc(c.apelido||"")+'</div><button class="btn-secondary" type="button" id="d_voltarCarrBtn" style="font-size:11px;min-height:32px;padding:5px 12px">← Voltar</button></div>';
+  if(!nT){
+    html+='<div class="empty-state"><div class="empty-title">Nenhum trecho ainda</div><div class="empty-text">Toque em "Adicionar trecho" abaixo para começar.</div></div>';
+  }else{
+    html+=c.trechos.map(function(t,i){return renderTrechoCard(t,i,carrSelecionado,c)}).join("");
+  }
+  html+='<button class="btn-add" type="button" id="d_addTrechoBtn" style="margin-top:12px"><span>＋</span> Adicionar trecho</button>';
+  html+='</div>';
+  el.innerHTML=html;
+
+  var addBtn=$("#d_addTrechoBtn");
+  if(addBtn)addBtn.addEventListener("click",function(){
+    var novo=novoTrecho();
+    novo.nome="Trecho "+(c.trechos.length+1);
+    c.trechos.push(novo);
+    marcarDirty();saveState();renderTrechoForm();renderCarrBtns();
+    setTimeout(function(){
+      var cards=$$("#d_trechoForm .trecho-card");
+      if(cards.length)cards[cards.length-1].scrollIntoView({behavior:"smooth",block:"center"});
+    },100);
+  });
+  var voltarBtn=$("#d_voltarCarrBtn");
+  if(voltarBtn)voltarBtn.addEventListener("click",function(){carrSelecionado=null;renderCarrBtns();renderTrechoForm()});
+
+  $$("#d_trechoForm input, #d_trechoForm select").forEach(function(inp){
+    inp.addEventListener("input",function(e){
+      var card=e.target.closest("[data-idx]");if(!card)return;
+      var i=Number(card.dataset.idx);var k=e.target.dataset.tk;var v=e.target.value;
+      if(e.target.type==="number")v=v===""?"":Number(v);
+      c.trechos[i][k]=v;
+      marcarDirty();saveState();
+    });
+  });
+  $$("#d_trechoForm [data-del-trecho]").forEach(function(b){
+    b.addEventListener("click",function(){
+      var i=Number(b.dataset.delTrecho);
+      openConfirm({title:"Excluir trecho?",message:"Remover este trecho?",okText:"Excluir",cancelText:"Cancelar",variant:"danger"},function(ok){
+        if(!ok)return;
+        c.trechos.splice(i,1);
+        marcarDirty();saveState();renderTrechoForm();renderCarrBtns();
+      });
+    });
+  });
+}
+
+function renderTrechoCard(t,i,carrIdx,carr){
+  var opcoesMetodo=Object.keys(METODOS).map(function(k){return '<option value="'+k+'"'+(t.tipo===k?" selected":"")+'>'+METODOS[k].label+'</option>'}).join("");
+  var mInfo=METODOS[t.tipo]||METODOS["F-just"];
+  var ambienteAuto=mInfo.ambiente;
+  var optsLinha='<option value="">Auto ('+(typeof mInfo.linha42==="number"?mInfo.linha42:"1")+')</option>'
+    +[1,2,3,4,5,"43"].map(function(l){
+      var lbl=(l===1?"Linha 1 — Feixe":l===2?"Linha 2 — Parede/piso":l===3?"Linha 3 — Teto":l===4?"Linha 4 — Bandeja perfurada":l===5?"Linha 5 — Leito/suporte":"Tabela 43 — Múltiplas camadas");
+      return '<option value="'+l+'"'+(String(t.linhaAgrupamento)===String(l)?" selected":"")+'>'+lbl+'</option>';
+    }).join("");
+  return '<div class="trecho-card" data-idx="'+i+'">'+
+    '<div class="trecho-header"><div class="trecho-title">Trecho '+(i+1)+' de '+carr.trechos.length+'</div>'+(carr.trechos.length>1?'<button class="icon-btn danger" type="button" data-del-trecho="'+i+'">🗑</button>':'')+'</div>'+
+    '<div class="trecho-grid">'+
+      '<div class="form-field"><label class="form-label">Nome</label><input class="form-input" data-tk="nome" value="'+esc(t.nome||"")+'"></div>'+
+      '<div class="form-field"><label class="form-label">Origem</label><input class="form-input" data-tk="origem" value="'+esc(t.origem||"")+'"></div>'+
+      '<div class="form-field"><label class="form-label">Destino</label><input class="form-input" data-tk="destino" value="'+esc(t.destino||"")+'"></div>'+
+      '<div class="form-field full"><label class="form-label">Método (NBR 5410 Tab. 33)</label><select class="form-select" data-tk="tipo">'+opcoesMetodo+'</select></div>'+
+      '<div class="form-field"><label class="form-label">Material</label><select class="form-select" data-tk="cabo">'+Object.keys(TIPO_CABO).map(function(k){return '<option value="'+k+'"'+(t.cabo===k?" selected":"")+'>'+TIPO_CABO[k]+'</option>'}).join("")+'</select></div>'+
+      '<div class="form-field"><label class="form-label">Isolação</label><select class="form-select" data-tk="isolacao"><option value="pvc"'+(t.isolacao==="pvc"?" selected":"")+'>PVC 70°C</option><option value="xlpe"'+(t.isolacao==="xlpe"?" selected":"")+'>XLPE/EPR 90°C</option></select></div>'+
+      '<div class="form-field"><label class="form-label">Comprimento (m)</label><input class="form-input" type="number" data-tk="comprimento" value="'+(t.comprimento!=null?t.comprimento:"")+'"></div>'+
+      '<div class="form-field"><label class="form-label">Circuitos agrupados</label><input class="form-input" type="number" min="1" data-tk="circuitosAgrupados" value="'+(t.circuitosAgrupados||1)+'"></div>'+
+      '<div class="form-field"><label class="form-label">Camadas (Tab. 43)</label><input class="form-input" type="number" min="1" data-tk="camadasAgrupadas" value="'+(t.camadasAgrupadas||1)+'"></div>'+
+      '<div class="form-field"><label class="form-label">Ambiente</label><select class="form-select" data-tk="ambiente"><option value=""'+((t.ambiente||"")===""?" selected":"")+'>Auto ('+(ambienteAuto==="solo"?"solo":"aéreo")+')</option><option value="aereo"'+(t.ambiente==="aereo"?" selected":"")+'>Aéreo</option><option value="solo"'+(t.ambiente==="solo"?" selected":"")+'>Solo</option></select></div>'+
+      '<div class="form-field"><label class="form-label">Forma de agrupamento (Tab. 42)</label><select class="form-select" data-tk="linhaAgrupamento">'+optsLinha+'</select></div>'+
+      '<div class="form-field"><label class="form-label">Temp. (°C)</label><input class="form-input" type="number" data-tk="tempAmb" value="'+(t.tempAmb!=null?t.tempAmb:30)+'"></div>'+
+      '<div class="form-field"><label class="form-label">Queda máx (%)</label><input class="form-input" type="number" data-tk="quedaMax" value="'+(t.quedaMax||4)+'"></div>'+
+      '<div class="form-field"><label class="form-label">Neutro necessário? (tri)</label><select class="form-select" data-tk="precisaNeutro"><option value="nao"'+(t.precisaNeutro!=="sim"?" selected":"")+'>Não</option><option value="sim"'+(t.precisaNeutro==="sim"?" selected":"")+'>Sim</option></select></div>'+
+      '<div class="form-field"><label class="form-label">Bitola do neutro (opcional)</label><input class="form-input" type="number" step="0.5" placeholder="= fases" data-tk="bitolaNeutro" value="'+esc(t.bitolaNeutro||"")+'"></div>'+
+      '<div class="form-field"><label class="form-label">Bitola do PE (opcional)</label><input class="form-input" type="number" step="0.5" placeholder="Tab. 58" data-tk="bitolaPE" value="'+esc(t.bitolaPE||"")+'"></div>'+
+    '</div>'+
+  '</div>';
+}
+function novoTrecho(){return {id:uid(),nome:"Trecho",origem:"",destino:"",tipo:"F-just",cabo:"cobre",isolacao:"pvc",comprimento:"",circuitosAgrupados:1,camadasAgrupadas:1,tempAmb:30,quedaMax:4,ambiente:"",linhaAgrupamento:"",precisaNeutro:"nao",bitolaNeutro:"",bitolaPE:""}}
+
+/* ============ PROTEÇÕES ============ */
+function renderProtec(){var el=$("#d_protecoes");if(!el)return;var d=dim.dados;var carrs=d.carregadores||[];var gi=(d.tipoGaragem==="interna"||d.tipoGaragem==="subsolo"||d.tipoGaragem==="coberta");var semCC=carrs.some(function(c){return c.protecaoCC!=="sim"});var items=[{t:"ok",txt:"Circuito exclusivo por carregador.",n:"NBR 17019"},{t:semCC?"warn":"ok",txt:semCC?"DR tipo B obrigatório":"Proteção CC integrada",n:"NBR 17019"},{t:"ok",txt:"DPS obrigatório",n:"NBR 5419"},{t:"ok",txt:"Condutor PE dedicado",n:"NBR 5410"},{t:gi?"warn":"ok",txt:gi?"Botão de desligamento obrigatório":"Desligamento não obrigatório",n:"IT 41"},{t:gi?"warn":"ok",txt:gi?"Alarme de incêndio obrigatório":"Alarme não obrigatório",n:"IT 41"}];el.innerHTML=items.map(function(c){var i=c.t==="ok"?"✓":c.t==="bad"?"✕":"!";return '<div class="check-item"><div class="check-icon '+c.t+'">'+i+'</div><div class="check-text">'+esc(c.txt)+'<div class="norma">'+esc(c.n)+'</div></div></div>'}).join("")}
+
+/* ============ ABA 4: CONDUTOS ============ */
+function popularCondutoSelects(){
+  var selL=$("#d_cond_larg");if(selL && !selL.options.length){selL.innerHTML=ELETROCALHAS_LARG.map(function(v){return '<option value="'+v+'">'+v+' mm</option>'}).join("")}
+  var selA=$("#d_cond_alt");if(selA && !selA.options.length){selA.innerHTML=ELETROCALHAS_ALT.map(function(v){return '<option value="'+v+'">'+v+' mm</option>'}).join("")}
+  var selDN=$("#d_cond_dn");if(selDN && !selDN.options.length){selDN.innerHTML=ELETRODUTOS.map(function(e){return '<option value="'+e.dn+'">DN '+e.dn+'</option>'}).join("")}
+  var selTC=$("#d_cond_tipoCabo");if(selTC && !selTC.options.length){selTC.innerHTML=Object.keys(TIPO_CABO_FISICO).map(function(k){return '<option value="'+k+'">'+TIPO_CABO_FISICO[k]+'</option>'}).join("")}
+  var d=dim.dados;if(!d.conduto)d.conduto={tipo:"eletrocalha",tipoCabo:"xlpe_sem_cob",larg:100,alt:50,dn:32};
+  var ct=$("#d_cond_tipo");if(ct)ct.value=d.conduto.tipo||"eletrocalha";
+  var ctc=$("#d_cond_tipoCabo");if(ctc)ctc.value=d.conduto.tipoCabo||"xlpe_sem_cob";
+  var cl=$("#d_cond_larg");if(cl)cl.value=d.conduto.larg||100;
+  var ca=$("#d_cond_alt");if(ca)ca.value=d.conduto.alt||50;
+  var cdn=$("#d_cond_dn");if(cdn)cdn.value=d.conduto.dn||32;
+  atualizarVisibilidadeConduto();
+  renderCircuitoResumo();
+  renderCondutoResultado();
+}
+function atualizarVisibilidadeConduto(){
+  var t=$("#d_cond_tipo")?$("#d_cond_tipo").value:"eletrocalha";
+  var wl=$("#d_cond_wrap_larg"),wa=$("#d_cond_wrap_alt"),wd=$("#d_cond_wrap_dn");
+  if(t==="eletrocalha"){
+    if(wl){wl.hidden=false;wl.style.display=""}
+    if(wa){wa.hidden=false;wa.style.display=""}
+    if(wd){wd.hidden=true;wd.style.display="none"}
+  }else{
+    if(wl){wl.hidden=true;wl.style.display="none"}
+    if(wa){wa.hidden=true;wa.style.display="none"}
+    if(wd){wd.hidden=false;wd.style.display=""}
+  }
+}
+function renderCircuitoResumo(){
+  var el=$("#d_circuitoResumo");if(!el)return;
+  var carrs=dim.dados.carregadores||[];
+  if(!carrs.length){el.innerHTML='<div class="muted">Nenhum carregador.</div>';return}
+  el.innerHTML=carrs.map(function(c,i){
+    var t1=c.trechos&&c.trechos[0];
+    if(!t1){return '<div class="circuito-resumo"><div><strong>Circuito '+(i+1)+'</strong><div class="meta">Sem trecho definido</div></div><div class="notacao">—</div></div>'}
+    var calc=calcTrecho({potencia:n(c.potencia,0),tensao:n(c.tensao,220),fases:c.fases,fp:0.95,comprimento:n(t1.comprimento,0),quedaMax:n(t1.quedaMax,4),metodo:t1.tipo||"F-just",cabo:t1.cabo||"cobre",isolacao:t1.isolacao||"pvc",circuitosAgrupados:n(t1.circuitosAgrupados,1),tempAmb:t1.tempAmb!=null?t1.tempAmb:30,ambiente:t1.ambiente||"",linhaAgrupamento:t1.linhaAgrupamento||"",camadasAgrupadas:n(t1.camadasAgrupadas,1)});
+    var bitNeutro=t1.bitolaNeutro!==""&&t1.bitolaNeutro!=null?Number(t1.bitolaNeutro):calc.bitola;
+    var bitPE=t1.bitolaPE!==""&&t1.bitolaPE!=null?Number(t1.bitolaPE):secaoPE(calc.bitola);
+    var notacao=notacaoCondutores(c.fases,c.tensao,calc.bitola,bitNeutro,bitPE,t1.precisaNeutro==="sim");
+    return '<div class="circuito-resumo"><div><strong>Circuito '+(i+1)+'</strong><div class="meta">'+esc(c.apelido||"")+' • '+esc(descreverLigacao(c.fases,c.tensao))+'</div></div><div class="notacao">'+esc(notacao)+'</div></div>';
+  }).join("");
+}
+function calcularOcupacaoTotal(){
+  var carrs=dim.dados.carregadores||[];
+  var cond=dim.dados.conduto||{};
+  var tipoFisico=cond.tipoCabo||"xlpe_sem_cob";
+  var diametros=DIAMETROS_CABO[tipoFisico]||DIAMETROS_CABO.xlpe_sem_cob;
+  var totalArea=0;
+  var detalhes=[];
+  carrs.forEach(function(c,i){
+    var t1=c.trechos&&c.trechos[0];
+    if(!t1) return;
+    var calc=calcTrecho({potencia:n(c.potencia,0),tensao:n(c.tensao,220),fases:c.fases,fp:0.95,comprimento:n(t1.comprimento,0),quedaMax:n(t1.quedaMax,4),metodo:t1.tipo||"F-just",cabo:t1.cabo||"cobre",isolacao:t1.isolacao||"pvc",circuitosAgrupados:n(t1.circuitosAgrupados,1),tempAmb:t1.tempAmb!=null?t1.tempAmb:30,ambiente:t1.ambiente||"",linhaAgrupamento:t1.linhaAgrupamento||"",camadasAgrupadas:n(t1.camadasAgrupadas,1)});
+    var bitF=calc.bitola;
+    var bitN=t1.bitolaNeutro!==""&&t1.bitolaNeutro!=null?Number(t1.bitolaNeutro):bitF;
+    var bitP=t1.bitolaPE!==""&&t1.bitolaPE!=null?Number(t1.bitolaPE):secaoPE(bitF);
+    var dF=diametros[bitF]||diametros[String(bitF)];
+    var dN=diametros[bitN]||dF;
+    var dP=diametros[bitP]||dF;
+    var aF=areaCabo(dF),aN=areaCabo(dN),aP=areaCabo(dP);
+    var nFases=(c.fases==="tri")?3:(c.fases==="bi"?2:1);
+    var temNeutro=true;
+    if(c.fases==="tri" && t1.precisaNeutro!=="sim") temNeutro=false;
+    var areaCircuito=(nFases*aF)+((temNeutro)?aN:0)+aP;
+    totalArea+=areaCircuito;
+    detalhes.push({circuito:i+1,apelido:c.apelido||"",nFases:nFases,temNeutro:temNeutro,bitF:bitF,bitN:bitN,bitP:bitP,dF:dF,dN:dN,dP:dP,area:areaCircuito});
+  });
+  var areaUtil=0,dimTexto="";
+  if(cond.tipo==="eletrocalha"){
+    var L=n(cond.larg,100),A=n(cond.alt,50);
+    areaUtil=L*A;dimTexto=L+" × "+A+" mm";
+  }else{
+    areaUtil=areaEletroduto(cond.dn);dimTexto="DN "+n(cond.dn,32);
+  }
+  var taxa=(areaUtil>0)?(totalArea/areaUtil)*100:0;
+  return {detalhes:detalhes,areaTotal:totalArea,areaUtil:areaUtil,taxa:taxa,conduto:cond.tipo,dimTexto:dimTexto,tipoFisico:tipoFisico};
+}
+function renderCondutoResultado(){
+  var el=$("#d_cond_resultado");if(!el)return;
+  var oc=calcularOcupacaoTotal();
+  var cls=oc.taxa<=35?"":oc.taxa<=40?"warn":"danger";
+  var parecer=oc.taxa<=35?"✅ Conduto suficiente — há espaço para expansão":oc.taxa<=40?"⚠️ Conduto suficiente — pouco espaço para expansão":"❌ Conduto INSUFICIENTE — substituir";
+  var html='<div class="result-grid">'+rItem("Circuitos",oc.detalhes.length)+rItem("Área ocupada",oc.areaTotal.toFixed(1)+" mm²")+rItem("Área útil",oc.areaUtil.toFixed(1)+" mm²")+rItem("Ocupação",oc.taxa.toFixed(1)+" %",true)+'</div>';
+  html+='<div class="aviso-visual '+cls+'" style="margin-top:12px"><span>'+'</span><span>'+parecer+'</span></div>';
+  if(oc.detalhes.length){
+    html+='<div class="calc-block"><div class="calc-block-title">Detalhes por circuito</div>';
+    html+='<table class="pot-tensao-table"><thead><tr><th>Circuito</th><th>Condutores</th><th>Área</th></tr></thead><tbody>';
+    oc.detalhes.forEach(function(d){
+      var desc=d.nFases+"×"+d.bitF+(d.temNeutro?" + 1×"+d.bitN:"")+" + 1×"+d.bitP;
+      html+='<tr><td><strong>'+d.circuito+' — '+esc(d.apelido)+'</strong></td><td>'+esc(desc)+'</td><td>'+d.area.toFixed(1)+' mm²</td></tr>';
+    });
+    html+='</tbody></table></div>';
+  }
+  if(oc.taxa>40){
+    var sugestoes=[];
+    ELETROCALHAS_LARG.forEach(function(L){ELETROCALHAS_ALT.forEach(function(A){
+      var area=L*A;var tx=(oc.areaTotal/area)*100;
+      if(tx<=40)sugestoes.push({tipo:"eletrocalha",lbl:"Eletrocalha "+L+"×"+A+" mm",taxa:tx,area:area});
+    })});
+    ELETRODUTOS.forEach(function(e){
+      var area=Math.PI*Math.pow(e.int/2,2);var tx=(oc.areaTotal/area)*100;
+      if(tx<=40)sugestoes.push({tipo:"eletroduto",lbl:"Eletroduto DN "+e.dn,taxa:tx,area:area});
+    });
+    sugestoes.sort(function(a,b){return a.area-b.area});
+    if(sugestoes.length){
+      html+='<div class="calc-block"><div class="calc-block-title">Sugestões (≤40%)</div><table class="pot-tensao-table"><thead><tr><th>Conduto</th><th>Taxa</th></tr></thead><tbody>';
+      sugestoes.slice(0,10).forEach(function(s){html+='<tr><td>'+esc(s.lbl)+'</td><td><strong>'+s.taxa.toFixed(1)+' %</strong></td></tr>'});
+      html+='</tbody></table></div>';
+    }
+  }
+  el.innerHTML=html;
+}
+
+/* ============ CÁLCULO GERAL ============ */
+function calcularProjeto(){
+  var d=dim.dados;var carrs=d.carregadores||[];
+  var qd=d.quadro||{};var tensaoRede=n(qd.tensao,0)||null;var fasesRede=qd.fases||null;
+  var tipoLigRede=(fasesRede==="mono")?"FN":"FF";
+  var det=[];
+  carrs.forEach(function(c,ci){
+    var trechos=c.trechos||[];
+    trechos.forEach(function(t,ti){
+      var potenciaReal=n(c.potencia,0);
+      if(tensaoRede && fasesRede){var res=potenciaParaTensao(c,tensaoRede,fasesRede,tipoLigRede);potenciaReal=res.potencia}
+      var p={potencia:potenciaReal,tensao:n(c.tensao,220),fases:c.fases,tipoLigacao:c.tipoLigacao||(c.fases==="mono"?"FN":"FF"),fp:0.95,comprimento:n(t.comprimento,0),quedaMax:n(t.quedaMax,4),metodo:t.tipo||"F-just",cabo:t.cabo||"cobre",isolacao:t.isolacao||"pvc",circuitosAgrupados:n(t.circuitosAgrupados,1),tempAmb:t.tempAmb!=null?t.tempAmb:30,ambiente:t.ambiente||"",linhaAgrupamento:t.linhaAgrupamento||"",camadasAgrupadas:n(t.camadasAgrupadas,1)};
+      if(!p.comprimento)return;
+      var calc=calcTrecho(p);
+      det.push({carregadorIdx:ci,trechoIdx:ti,carregador:c,trecho:t,calc:calc,potenciaReal:potenciaReal,potenciaNominal:n(c.potencia,0)});
+    });
+  });
+  var potTot=det.reduce(function(s,x){return s+(n(x.calc.potencia,0))},0);
+  var potTotNominal=carrs.reduce(function(s,c){return s+(n(c.potencia,0))},0);
+  var prim=carrs[0];var iTot=0;
+  if(prim){var U=n(prim.tensao,220);var P=det.length?det[0].calc.potencia:n(prim.potencia,0);if(prim.fases==="tri")iTot=(P*1000)/(Math.sqrt(3)*U*0.95);else iTot=(P*1000)/(U*0.95)}
+  var temSemCC=carrs.some(function(c){return c.protecaoCC!=="sim"});
+  var ocup=calcularOcupacaoTotal();
+  dim.resultado={detalhes:det,potenciaTotal:potTot,potenciaTotalNominal:potTotNominal,correnteTotal:iTot,carregadores:carrs,quadro:d.quadro,ocupacao:ocup,drTipo:temSemCC?"DR Tipo B":"DR Tipo A (proteção CC integrada)",dpsClasse:"Classe II",dpsTensao:prim?prim.tensao+" V":"—",criadoEm:new Date().toISOString()};
+  saveState();return dim.resultado;
+}
+function rItem(l,v,h){return '<div class="result-item"><div class="result-label">'+esc(l)+'</div><div class="result-value'+(h?" highlight":"")+'">'+esc(String(v))+'</div></div>'}
+function cStep(l,v,h){return '<div class="calc-step"><span class="lbl">'+esc(l)+'</span><span class="val'+(h?" highlight":"")+'">'+esc(String(v))+'</span></div>'}
+function renderResultado(){
+  var r=dim.resultado,el=$("#d_resultado");
+  if(!r||!r.detalhes||!r.detalhes.length){el.innerHTML='<div class="empty-state"><div class="empty-title">Sem resultado</div></div>';renderVal(null);return}
+  var h='<div class="result-grid">'+rItem("Potência total (real)",r.potenciaTotal.toFixed(2)+" kW",true)+rItem("Corrente total",r.correnteTotal.toFixed(1)+" A")+rItem("Circuitos",r.carregadores.length)+rItem("Trechos",r.detalhes.length)+'</div>';
+  if(r.ocupacao){
+    var o=r.ocupacao;
+    var cls=o.taxa<=35?"":o.taxa<=40?"warn":"danger";
+    h+='<div class="calc-block"><div class="calc-block-title">Ocupação do conduto</div>'+cStep("Conduto",o.conduto==="eletrocalha"?"Eletrocalha "+o.dimTexto:"Eletroduto "+o.dimTexto)+cStep("Área ocupada",o.areaTotal.toFixed(1)+" mm²")+cStep("Área útil",o.areaUtil.toFixed(1)+" mm²")+cStep("Taxa de ocupação",o.taxa.toFixed(1)+" %",true)+'<div class="aviso-visual '+cls+'" style="margin-top:8px"><span>'+(o.taxa<=35?"✅":o.taxa<=40?"⚠️":"❌")+'</span><span>'+(o.taxa<=35?"Conduto suficiente":o.taxa<=40?"Conduto suficiente (pouco espaço para expansão)":"Conduto INSUFICIENTE — substituir")+'</span></div></div>';
+  }
+  r.detalhes.forEach(function(x){
+    var c=x.calc;
+    h+='<div class="calc-block"><div class="calc-block-title">Circuito '+(x.carregadorIdx+1)+' — Trecho '+(x.trechoIdx+1)+' — '+esc(x.carregador.apelido||"")+'</div>';
+    h+=cStep("Método",METODO_SHORT[c.metodo]||c.metodo);
+    h+=cStep("Ambiente",c.ambiente==="solo"?"Solo (20°C)":"Aéreo (30°C)");
+    h+=cStep("Comprimento",c.comprimento+" m");
+    h+=cStep("Ib",c.Ib.toFixed(2)+" A",true);
+    h+=cStep("Bitola",c.bitola+" mm²",true);
+    h+=cStep("Queda",c.quedaEf.toFixed(2)+" %",c.quedaEf<=c.quedaMax);
+    h+=cStep("Disjuntor",c.disjuntor+" A");
+    h+='</div>';
+  });
+  el.innerHTML=h;renderVal(r);
+}
+function renderVal(r){
+  var el=$("#d_validacoes");if(!el)return;
+  var d=dim.dados;var carrs=d.carregadores||[];var ck=[];
+  var semCC=carrs.filter(function(c){return c.protecaoCC!=="sim"});
+  if(semCC.length)ck.push({s:"warn",t:"DR tipo B obrigatório.",n:"NBR 17019"});else if(carrs.length)ck.push({s:"ok",t:"Proteção CC integrada.",n:"NBR 17019"});
+  carrs.forEach(function(c,ci){
+    if(!c.trechos||!c.trechos.length)ck.push({s:"bad",t:"Carregador "+(ci+1)+" sem trecho definido.",n:"Projeto"});
+  });
+  if(r&&r.ocupacao){
+    if(r.ocupacao.taxa>40)ck.push({s:"bad",t:"Ocupação do conduto é "+(r.ocupacao.taxa.toFixed(1))+"% (>40%). Substituir.",n:"NBR 5410"});
+    else if(r.ocupacao.taxa>35)ck.push({s:"warn",t:"Ocupação do conduto é "+(r.ocupacao.taxa.toFixed(1))+"% (pouco espaço).",n:"NBR 5410"});
+  }
+  if(!ck.length){el.innerHTML='<div class="muted">Preencha os dados.</div>';return}
+  el.innerHTML=ck.map(function(c){var i=c.s==="ok"?"✓":c.s==="bad"?"✕":"!";return '<div class="check-item"><div class="check-icon '+c.s+'">'+i+'</div><div class="check-text">'+esc(c.t)+'<div class="norma">'+esc(c.n||"")+'</div></div></div>'}).join("");
+}
+
+/* ============ MEMORIAL ============ */
+function gerarMemorialCompleto(r){
+  if(!r)return "";
+  var d=dim.dados;
+  var cl=state.clientes.find(function(c){return c.id===d.clienteId});
+  var prim=r.carregadores[0]||{};
+  var hoje=new Date().toLocaleDateString("pt-BR");
+  var h='<div style="text-align:center;border-bottom:2px solid #111;padding-bottom:14px;margin-bottom:22px"><h1 style="font-size:22px;font-weight:700;margin:0 0 4px">MEMORIAL DESCRITIVO E DE CÁLCULO</h1><div style="font-size:12px;color:#555">Instalação elétrica para recarga de veículo elétrico</div></div>';
+  h+='<table style="margin-bottom:20px"><tr><th>Projeto</th><td>'+(cl?"Recarga VE — "+esc(cl.nome):"Recarga VE")+'</td></tr><tr><th>Cliente</th><td>'+esc(cl?cl.nome:"—")+'</td></tr><tr><th>Endereço</th><td>'+esc(d.endereco||"—")+'</td></tr><tr><th>Responsável técnico</th><td>'+esc(d.responsavelTecnico||"—")+'</td></tr><tr><th>Data</th><td>'+esc(d.dataProjeto||hoje)+'</td></tr></table>';
+  var qtd=r.carregadores.length;
+  h+='<h2>1. Premissas do projeto</h2><table><tr><th>Topologia</th><td>'+(qtd===1?"Wallbox única":qtd+" carregadores — circuitos independentes")+'</td></tr><tr><th>Fator de demanda</th><td>1,0 (NBR 17019 – carga contínua)</td></tr><tr><th>Condutor</th><td>Cobre EPR/XLPE 90°C – 0,6/1 kV</td></tr><tr><th>Esquema de aterramento</th><td>TN-S</td></tr><tr><th>Limite de queda de tensão</th><td>4% (soma dos trechos em série)</td></tr></table>';
+  h+='<h2>2. Circuitos</h2>';
+  r.carregadores.forEach(function(c,ci){
+    var notacao="";
+    var t1=c.trechos&&c.trechos[0];
+    if(t1){
+      var calc=calcTrecho({potencia:n(c.potencia,0),tensao:n(c.tensao,220),fases:c.fases,fp:0.95,comprimento:n(t1.comprimento,0),quedaMax:n(t1.quedaMax,4),metodo:t1.tipo||"F-just",cabo:t1.cabo||"cobre",isolacao:t1.isolacao||"pvc",circuitosAgrupados:n(t1.circuitosAgrupados,1),tempAmb:t1.tempAmb!=null?t1.tempAmb:30,ambiente:t1.ambiente||"",linhaAgrupamento:t1.linhaAgrupamento||"",camadasAgrupadas:n(t1.camadasAgrupadas,1)});
+      var bitN=t1.bitolaNeutro!==""&&t1.bitolaNeutro!=null?Number(t1.bitolaNeutro):calc.bitola;
+      var bitP=t1.bitolaPE!==""&&t1.bitolaPE!=null?Number(t1.bitolaPE):secaoPE(calc.bitola);
+      notacao=notacaoCondutores(c.fases,c.tensao,calc.bitola,bitN,bitP,t1.precisaNeutro==="sim");
+    }
+    h+='<h3 style="font-size:14px;font-weight:700;margin:16px 0 8px">Circuito '+(ci+1)+' — '+esc(c.apelido||"")+'</h3>';
+    h+='<table>';
+    h+='<tr><th>Carregador</th><td>'+esc(c.apelido||"")+'</td></tr>';
+    h+='<tr><th>Ligação</th><td>'+esc(descreverLigacao(c.fases,c.tensao))+'</td></tr>';
+    h+='<tr><th>Condutores</th><td><span class="notacao-bloco">'+esc(notacao)+'</span></td></tr>';
+    h+='</table>';
+    (c.trechos||[]).forEach(function(t,ti){
+      var calc=calcTrecho({potencia:n(c.potencia,0),tensao:n(c.tensao,220),fases:c.fases,fp:0.95,comprimento:n(t.comprimento,0),quedaMax:n(t.quedaMax,4),metodo:t.tipo||"F-just",cabo:t.cabo||"cobre",isolacao:t.isolacao||"pvc",circuitosAgrupados:n(t.circuitosAgrupados,1),tempAmb:t.tempAmb!=null?t.tempAmb:30,ambiente:t.ambiente||"",linhaAgrupamento:t.linhaAgrupamento||"",camadasAgrupadas:n(t.camadasAgrupadas,1)});
+      h+='<h4 style="font-size:12px;font-weight:700;margin:12px 0 6px">Trecho '+(ti+1)+' de '+c.trechos.length+'</h4>';
+      h+='<table>';
+      h+='<tr><th>Origem → Destino</th><td>'+esc((t.origem||"")+" → "+(t.destino||""))+'</td></tr>';
+      h+='<tr><th>Método (Tab. 33)</th><td>'+esc(METODOS[calc.metodo]?METODOS[calc.metodo].label:calc.metodo)+'</td></tr>';
+      h+='<tr><th>Ambiente</th><td>'+(calc.ambiente==="solo"?"Solo":"Aéreo")+'</td></tr>';
+      h+='<tr><th>Comprimento</th><td>'+calc.comprimento+' m</td></tr>';
+      h+='<tr><th>Material / Isolação</th><td>'+esc(TIPO_CABO[calc.cabo])+' / '+calc.isolacao.toUpperCase()+'</td></tr>';
+      h+='<tr><th>Ib / Iz / Disjuntor</th><td>'+calc.Ib.toFixed(2)+' A / '+calc.IzCorrig.toFixed(1)+' A / '+calc.disjuntor+' A</td></tr>';
+      h+='<tr><th>Bitola</th><td><strong>'+calc.bitola+' mm²</strong></td></tr>';
+      h+='<tr><th>Queda de tensão</th><td>'+calc.quedaEf.toFixed(2)+' %</td></tr>';
+      h+='</table>';
+    });
+  });
+  if(r.ocupacao){
+    var o=r.ocupacao;
+    h+='<h2>3. Conduto</h2><table>';
+    h+='<tr><th>Tipo</th><td>'+(o.conduto==="eletrocalha"?"Eletrocalha":"Eletroduto")+'</td></tr>';
+    h+='<tr><th>Dimensão</th><td>'+esc(o.dimTexto)+'</td></tr>';
+    h+='<tr><th>Tipo físico do cabo</th><td>'+esc(TIPO_CABO_FISICO[o.tipoFisico]||o.tipoFisico)+'</td></tr>';
+    h+='<tr><th>Área ocupada</th><td>'+o.areaTotal.toFixed(1)+' mm²</td></tr>';
+    h+='<tr><th>Área útil</th><td>'+o.areaUtil.toFixed(1)+' mm²</td></tr>';
+    h+='<tr><th>Taxa de ocupação</th><td><strong>'+o.taxa.toFixed(1)+' %</strong> ('+(o.taxa<=40?"OK ≤ 40%":"INSUFICIENTE > 40%")+')</td></tr>';
+    h+='</table>';
+    h+='<h4 style="font-size:12px;font-weight:700;margin:12px 0 6px">Ocupação por circuito</h4><table>';
+    o.detalhes.forEach(function(dd){
+      h+='<tr><th>Circuito '+dd.circuito+' — '+esc(dd.apelido)+'</th><td>'+dd.area.toFixed(1)+' mm²</td></tr>';
+    });
+    h+='</table>';
+  }
+  h+='<h2>4. Resumo</h2><table>';
+  h+='<tr><th>Potência total</th><td><strong>'+r.potenciaTotal.toFixed(2)+' kW</strong></td></tr>';
+  h+='<tr><th>Corrente total</th><td><strong>'+r.correnteTotal.toFixed(1)+' A</strong></td></tr>';
+  h+='<tr><th>Carregadores</th><td>'+r.carregadores.length+'</td></tr>';
+  h+='<tr><th>DR</th><td>'+esc(r.drTipo)+'</td></tr>';
+  h+='<tr><th>DPS</th><td>'+esc(r.dpsClasse)+' / '+esc(r.dpsTensao)+'</td></tr>';
+  h+='</table>';
+  h+='<h2>5. Normas</h2><table><tr><th>NBR 5410</th><td>Instalações de baixa tensão</td></tr><tr><th>NBR 17019</th><td>Alimentação de VEs</td></tr><tr><th>IEC 61851</th><td>Carga condutiva</td></tr></table>';
+  h+='<div class="footer-note">Gerado em '+hoje+'. Não substitui projeto completo com ART.</div>';
+  return h;
+}
+function renderFinal(){var r=calcularProjeto();if(!r)return;var el=$("#reportPreview");if(el)el.innerHTML=gerarMemorialCompleto(r)}
+
+/* ============ IMPRESSÃO NATIVA ============ */
+$("#btnPrintPdf").addEventListener("click",function(){
+  var r=dim.resultado;
+  if(!r){toast("Calcule primeiro","danger");return}
+  var html=gerarMemorialCompleto(r);
+  var css='body{font-family:Georgia,serif;color:#111;margin:0;padding:0;line-height:1.5}h1{font-size:20px;font-weight:700;margin:0 0 6px;text-align:center}h2{font-size:13.5px;font-weight:700;text-transform:uppercase;color:#222;margin:26px 0 10px;padding-bottom:6px;border-bottom:1.5px solid #ccc;page-break-after:avoid}h3{font-size:14px;font-weight:700;margin:16px 0 8px;page-break-after:avoid}h4{font-size:12px;font-weight:700;margin:12px 0 6px;page-break-after:avoid}table{width:100%;border-collapse:collapse;margin:10px 0 16px;font-size:11px;page-break-inside:avoid}th,td{padding:6px 8px;text-align:left;border-bottom:1px solid #e5e5e5;vertical-align:top;color:#111}th{color:#555;font-weight:650;font-size:10px;text-transform:uppercase;width:42%;background:#fafafa}td strong{color:#000;font-weight:700}.footer-note{margin-top:32px;padding-top:16px;border-top:1px solid #ccc;color:#666;font-size:10.5px;font-style:italic}.notacao-bloco{font-family:Consolas,monospace;background:#f4f4f4;padding:4px 8px;border-radius:4px;color:#000;font-weight:700;display:inline-block;letter-spacing:.03em}@page{margin:16mm;size:A4}';
+  var doc='<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><title>memorial</title><style>'+css+'</style></head><body>'+html+'</body></html>';
+  var old=document.getElementById("_printFrame");if(old)old.remove();
+  var ifr=document.createElement("iframe");
+  ifr.id="_printFrame";
+  ifr.style.cssText="position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden";
+  document.body.appendChild(ifr);
+  var idoc=ifr.contentWindow.document;
+  idoc.open();idoc.write(doc);idoc.close();
+  var tentou=0;
+  function tentar(){
+    tentou++;
+    try{
+      ifr.contentWindow.focus();
+      ifr.contentWindow.print();
+      toast("Janela de impressão aberta.");
+    }catch(e){
+      if(tentou<5) setTimeout(tentar,300);
+      else toast("Erro ao imprimir","danger");
+    }
+  }
+  setTimeout(tentar,400);
+});
+
+/* ============ MODO LEITURA ============ */
+function atualizarModoLeitura(){var row=$("#dimActionsRow");if(!row)return;var bS=$("#btnSalvarDim"),bE=$("#btnEditarDim");if(dim.somenteLeitura){if(bS)bS.style.display="none";if(!bE){bE=document.createElement("button");bE.id="btnEditarDim";bE.type="button";bE.className="btn-warn";bE.innerHTML="✎ Editar dimensionamento";bE.addEventListener("click",function(){openConfirm({title:"Editar?",message:"Modo somente leitura será desativado.",okText:"Editar",cancelText:"Cancelar",variant:"warn"},function(ok){if(!ok)return;dim.somenteLeitura=false;atualizarModoLeitura();dim.step=1;saveState();renderStepper();carregarDim();toast("Edição liberada.")})});row.insertBefore(bE,bS)}bE.style.display=""}else{if(bS)bS.style.display="";if(bE)bE.style.display="none"}}
+function aplicarModoLeitura(){var lock=!!dim.somenteLeitura;$$(".dim-step[data-step='1'] input, .dim-step[data-step='1'] select, .dim-step[data-step='2'] input, .dim-step[data-step='2'] select, .dim-step[data-step='2'] button, .dim-step[data-step='3'] input, .dim-step[data-step='3'] select, .dim-step[data-step='3'] button, .dim-step[data-step='4'] input, .dim-step[data-step='4'] select").forEach(function(el){el.disabled=lock});atualizarModoLeitura()}
+
+/* ============ SALVAR DIM ============ */
+$("#btnSalvarDim").addEventListener("click",function(){
+  var d=dim.dados;
+  if(!d.clienteId){toast("Selecione cliente","danger");return}
+  if(!d.carregadores.length){toast("Adicione carregadores","danger");return}
+  var faltam=d.carregadores.filter(function(c){return !c.trechos||!c.trechos.length});
+  if(faltam.length){toast("Há "+faltam.length+" carregador(es) sem trecho","danger");return}
+  var r=calcularProjeto();
+  var cl=state.clientes.find(function(c){return c.id===d.clienteId});
+  var nomeSug=dim.nome||"Dimensionamento "+(state.dimensionamentos.filter(function(x){return x.clienteId===d.clienteId}).length+1);
+  var isEdit=!!dim.id;
+  openConfirm({title:isEdit?"Atualizar?":"Salvar?",message:(isEdit?"Atualizar":"Salvar")+' "'+nomeSug+'" para '+(cl?cl.nome:"?")+'?',okText:isEdit?"Atualizar":"Salvar",cancelText:"Cancelar",variant:"info"},function(ok){
+    if(!ok)return;
+    var payload={id:dim.id||uid(),clienteId:d.clienteId,nome:nomeSug,criadoEm:dim.criadoEm||new Date().toISOString(),atualizadoEm:new Date().toISOString(),dados:JSON.parse(JSON.stringify(d)),resultado:JSON.parse(JSON.stringify(r)),reportHTML:gerarMemorialCompleto(r)};
+    if(dim.id){var i=state.dimensionamentos.findIndex(function(x){return x.id===dim.id});if(i>-1)state.dimensionamentos[i]=payload;else state.dimensionamentos.push(payload)}
+    else{state.dimensionamentos.push(payload);dim.id=payload.id}
+    dim.criadoEm=payload.criadoEm;saveState();dimDirty=false;renderDash();toast("Salvo.")
+  })
+});
+$("#btnExportDim").addEventListener("click",function(){var r=dim.resultado;if(!r){toast("Calcule primeiro","danger");return}try{var payload={app:"SAVE-DIMENSIONA",versao:42,exportadoEm:new Date().toISOString(),dados:dim.dados,resultado:r};var json=JSON.stringify(payload,null,2);var blob=new Blob([json],{type:"application/json"});var url=URL.createObjectURL(blob);var a=document.createElement("a");a.href=url;a.download="dimensionamento-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},1000);toast("Exportado.")}catch(e){console.error(e);toast("Erro ao exportar","danger")}});
+
+/* ============ STEPPER ============ */
+var TITLES=["Dados","Veíc/Carr","Infra","Condutos","Cálculo","Relatório"];
+function renderStepper(){var st=$("#stepper");if(!st)return;var s=dim.step;st.innerHTML=TITLES.map(function(t,i){var n=i+1;return '<button class="stepper-item '+(n===s?"active":n<s?"done":"")+'" data-step="'+n+'">'+t+'</button>'}).join("");$$(".dim-step").forEach(function(el){el.hidden=Number(el.dataset.step)!==s});$("#dim-step-count").textContent="passo "+s+" de 6";$("#dim-title").textContent=["Dados do projeto.","Veículos e carregadores.","Infraestrutura.","Condutos.","Resultado e validações.","Relatório do pré-dimensionamento."][s-1];$("#dimPrev").disabled=s===1;$("#dimNext").innerHTML=s===6?"Reiniciar ↺":"Continuar →"}
+$("#stepper").addEventListener("click",function(e){var b=e.target.closest(".stepper-item");if(!b)return;var t=Number(b.dataset.step);if(dim.somenteLeitura&&t!==6){toast("Modo somente leitura.","warn");return}goTo(t)});
+function goTo(n){
+  if(dim.somenteLeitura&&n!==6){toast("Modo somente leitura.","warn");return}
+  dim.step=Math.max(1,Math.min(6,n));saveState();renderStepper();
+  if(dim.step===1)carregarDim();
+  if(dim.step===2){popularVeiculos();popularCarrsDim();renderPreviewCarr();renderCarrsProj()}
+  if(dim.step===3){carregarDim();renderCarrBtns();renderTrechoForm();renderProtec()}
+  if(dim.step===4){popularCondutoSelects();atualizarVisibilidadeConduto()}
+  if(dim.step===5){calcularProjeto();renderResultado()}
+  if(dim.step===6){renderFinal()}
+  window.scrollTo({top:0});
+}
+$("#dimPrev").addEventListener("click",function(){if(dim.somenteLeitura){toast("Modo somente leitura.","warn");return}goTo(dim.step-1)});
+$("#dimNext").addEventListener("click",function(){
+  if(dim.somenteLeitura){toast("Modo somente leitura.","warn");return}
+  if(dim.step===6){openConfirm({title:"Reiniciar?",message:"Resultado será apagado.",okText:"Reiniciar",cancelText:"Cancelar",variant:"warn"},function(ok){if(!ok)return;dim=defaultDim();dimDirty=false;carrSelecionado=null;saveState();renderStepper();carregarDim();goTo(1)});return}
+  if(!validarStep(dim.step))return;
+  goTo(dim.step+1);
+});
+function validarStep(n){
+  var d=dim.dados;
+  if(n===1){
+    if(!d.responsavelTecnico){toast("Informe o responsável técnico","danger");return false}
+    if(!d.clienteId){toast("Selecione o cliente","danger");return false}
+    if(!d.tipoEdificacao){toast("Tipo de edificação","danger");return false}
+    if(!d.tipoGaragem){toast("Tipo de garagem","danger");return false}
+    if(!d.endereco){toast("Endereço","danger");return false}
+  }
+  if(n===2){
+    if(!d.carregadores.length){toast("Adicione pelo menos 1 carregador","danger");return false}
+  }
+  if(n===3){
+    if(!d.quadro.tensao||!d.quadro.fases){toast("Preencha tensão e fases do quadro","danger");return false}
+    var faltam=d.carregadores.filter(function(c){return !c.trechos||!c.trechos.length});
+    if(faltam.length){toast("Há "+faltam.length+" carregador(es) sem trecho definido","danger");return false}
+  }
+  return true;
+}
+
+/* ============ LISTENERS ============ */
+["d_responsavel","d_endereco","d_data","d_tipoEdif","d_tipoGaragem"].forEach(function(id){var el=document.getElementById(id);if(!el)return;el.addEventListener("input",function(){salvarCamposDim();marcarDirty()});el.addEventListener("change",function(){salvarCamposDim();marcarDirty()})});
+["d_possuiVeiculo","d_necessidade","d_qtdVeiculos"].forEach(function(id){var el=document.getElementById(id);if(!el)return;el.addEventListener("input",function(){salvarCamposDim();marcarDirty()});el.addEventListener("change",function(){salvarCamposDim();if(id==="d_possuiVeiculo")toggleVeiculo();popularCarrsDim();marcarDirty()})});
+["d_qd_tensao","d_qd_fases","d_qd_carga","d_qd_fp","d_qd_pctDemanda","d_qd_djGeral"].forEach(function(id){var el=document.getElementById(id);if(!el)return;el.addEventListener("input",function(){salvarCamposDim();marcarDirty();renderAvisoRede();renderPreviewCarr()});el.addEventListener("change",function(){salvarCamposDim();marcarDirty();renderAvisoRede();renderPreviewCarr()})});
+$("#d_cliente").addEventListener("change",function(){dim.dados.clienteId=this.value;atualizarInfoCliente();importarDadosCliente();marcarDirty();saveState()});
+$("#d_veiculoBusca").addEventListener("input",popularVeiculos);
+$("#d_veiculo").addEventListener("change",function(){dim.dados.veiculoId=this.value;autoPreencherNecessidade();popularCarrsDim();marcarDirty();saveState()});
+$("#d_carrBusca").addEventListener("input",popularCarrsDim);
+$("#d_addCarregador").addEventListener("change",renderPreviewCarr);
+$("#d_addCarr").addEventListener("click",function(){
+  var sel=$("#d_addCarregador");if(!sel.value)return;
+  var c=state.carregadores.find(function(x){return x.id===sel.value});if(!c)return;
+  var pptCopia=(c.potenciaPorTensao && c.potenciaPorTensao.length) ? JSON.parse(JSON.stringify(c.potenciaPorTensao)) : inferirPotenciaPorTensao(c);
+  dim.dados.carregadores.push({id:uid(),carregadorId:c.id,apelido:c.apelido,potencia:Number(c.potencia),tensao:Number(c.tensao),fases:c.fases,tipoLigacao:c.tipoLigacao||(c.fases==="mono"?"FN":"FF"),conector:c.conector,comprimento:"",smartCharging:c.smartCharging==="sim"?"sim":"nao",protecaoCC:c.protecaoCC==="sim"?"sim":"nao",potenciaPorTensao:pptCopia,trechos:[]});
+  marcarDirty();saveState();renderCarrsProj();renderCarrBtns();renderTrechoForm();renderProtec();
+  toast("Carregador adicionado.");
+});
+["d_cond_tipo","d_cond_tipoCabo","d_cond_larg","d_cond_alt","d_cond_dn"].forEach(function(id){
+  var el=document.getElementById(id);if(!el)return;
+  el.addEventListener("change",function(){
+    var d=dim.dados;if(!d.conduto)d.conduto={};
+    if($("#d_cond_tipo"))d.conduto.tipo=$("#d_cond_tipo").value;
+    if($("#d_cond_tipoCabo"))d.conduto.tipoCabo=$("#d_cond_tipoCabo").value;
+    if($("#d_cond_larg"))d.conduto.larg=Number($("#d_cond_larg").value);
+    if($("#d_cond_alt"))d.conduto.alt=Number($("#d_cond_alt").value);
+    if($("#d_cond_dn"))d.conduto.dn=Number($("#d_cond_dn").value);
+    marcarDirty();saveState();
+    atualizarVisibilidadeConduto();
+    renderCircuitoResumo();
+    renderCondutoResultado();
+  });
+});
+
+/* ============ SALVAR CAMPOS ============ */
+function salvarCamposDim(){
+  var d=dim.dados;
+  var map={d_responsavel:"responsavelTecnico",d_tipoEdif:"tipoEdificacao",d_tipoGaragem:"tipoGaragem",d_endereco:"endereco",d_data:"dataProjeto",d_possuiVeiculo:"possuiVeiculo",d_necessidade:"necessidade",d_qtdVeiculos:"qtdVeiculos"};
+  Object.keys(map).forEach(function(id){var el=document.getElementById(id);if(el)d[map[id]]=el.value});
+  if(!d.quadro)d.quadro={};
+  var qmap={d_qd_tensao:"tensao",d_qd_fases:"fases",d_qd_carga:"carga",d_qd_fp:"fp",d_qd_pctDemanda:"pctDemanda",d_qd_djGeral:"djGeral"};
+  Object.keys(qmap).forEach(function(id){var el=document.getElementById(id);if(!el)return;var v=el.value;if(el.type==="number"&&v!=="")v=Number(v);d.quadro[qmap[id]]=v});
+  saveState();
+}
+
+/* ============ PAINEL CLIENTE ============ */
+function abrirPainelCliente(id){
+  var cl=state.clientes.find(function(c){return c.id===id});if(!cl)return;
+  var dims=state.dimensionamentos.filter(function(d){return d.clienteId===id});
+  modalBox.classList.add("large");
+  modalTitle.textContent="Cliente: "+(cl.nome||"—");
+  var info='<div class="form-grid">'+
+    '<div class="form-field"><label class="form-label">Documento</label><div>'+esc(cl.documento||"—")+'</div></div>'+
+    '<div class="form-field"><label class="form-label">Tipo</label><div>'+esc(TIPO_EDIF[cl.tipoEdificacao]||"—")+'</div></div>'+
+    '<div class="form-field"><label class="form-label">E-mail</label><div>'+esc(cl.email||"—")+'</div></div>'+
+    '<div class="form-field"><label class="form-label">Telefone</label><div>'+esc(cl.telefone||"—")+'</div></div>'+
+    '<div class="form-field full"><label class="form-label">Endereço</label><div>'+esc([cl.rua,cl.numero,cl.complemento,cl.cidade,cl.uf].filter(Boolean).join(", ")||"—")+'</div></div>'+
+  '</div>';
+  var dH='<h3 class="mt-20">Dimensionamentos ('+dims.length+')</h3>';
+  if(!dims.length){dH+='<div class="empty-state"><div class="empty-title">Nenhum dimensionamento</div><div class="empty-text">Clique em "Nova versão" para criar.</div></div>';}
+  else{dH+=dims.map(function(d){var r=d.resultado||{};var qtd=(r.carregadores||[]).length||0;return '<div class="dim-item"><div class="info"><div class="name">'+esc(d.nome)+'</div><div class="meta">'+new Date(d.criadoEm).toLocaleDateString("pt-BR")+' • '+(r.potenciaTotal||0).toFixed(1)+' kW • '+qtd+' carregador(es)</div></div><div style="display:flex;gap:6px"><button class="icon-btn" data-open-dim="'+d.id+'" title="Abrir">↗</button><button class="icon-btn danger" data-del-dim="'+d.id+'" title="Excluir">🗑</button></div></div>'}).join("")}
+  modalBody.innerHTML=info+dH;
+  customAct="painelCliente";curEnt="__painel__";curId=id;readonly=true;
+  modalSubmit.textContent="＋ Nova versão";
+  modalSubmit.classList.remove("btn-secondary");
+  modalSubmit.classList.add("primary-button");
+  modalCancel.textContent="Fechar";
+  modalBack.classList.add("open");
+  document.body.style.overflow="hidden";
+  $$("#modalBody [data-del-dim]").forEach(function(b){b.addEventListener("click",function(){var did=b.dataset.delDim;openConfirm({title:"Excluir?",message:"Excluir dimensionamento?",okText:"Excluir",cancelText:"Cancelar",variant:"danger"},function(ok){if(!ok)return;state.dimensionamentos=state.dimensionamentos.filter(function(x){return x.id!==did});saveState();renderDash();abrirPainelCliente(id);toast("Dimensionamento excluído.","danger");})})});
+  $$("#modalBody [data-open-dim]").forEach(function(b){b.addEventListener("click",function(){var d=state.dimensionamentos.find(function(x){return x.id===b.dataset.openDim});if(!d)return;dim=JSON.parse(JSON.stringify(d));dim.somenteLeitura=true;dim.step=6;dimDirty=false;carrSelecionado=null;forceClose();selectPage("dimensionamento",true);renderStepper();calcularProjeto();renderFinal();aplicarModoLeitura();toast("Aberto em modo somente leitura.");})});
+}
+
+/* ============ EXPORT/IMPORT ============ */
+function exportAll(){var payload={app:"SAVE-DIMENSIONA",versao:42,exportadoEm:new Date().toISOString(),dados:state};var json=JSON.stringify(payload,null,2);var nome="save-dimensiona-"+new Date().toISOString().slice(0,10)+".json";try{var blob=new Blob([json],{type:"application/json"});var url=URL.createObjectURL(blob);var a=document.createElement("a");a.href=url;a.download=nome;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},1000);toast("Exportado.")}catch(e){toast("Erro ao exportar","danger")}}
+$("#btnExport").addEventListener("click",exportAll);
+$("#btnImport").addEventListener("click",function(){$("#fileImport").click()});
+$("#fileImport").addEventListener("change",function(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var p=JSON.parse(r.result);var d=p.dados||p;openConfirm({title:"Importar?",message:"Dados atuais serão substituídos.",okText:"Importar",cancelText:"Cancelar",variant:"warn"},function(ok){if(!ok)return;Object.keys(d).forEach(function(k){state[k]=d[k]});saveState();renderAll();toast("Importado.")})}catch(err){toast("Arquivo inválido","danger")}finally{e.target.value=""}};r.readAsText(f)});
+
+/* ============ RESIZE ============ */
+window.addEventListener("resize",function(){ovl.classList.remove("open");if(window.innerWidth>=720){sidebar.classList.remove("collapsed")}else{sidebar.classList.add("collapsed")}});
+
+/* ============ BOOT ============ */
+function boot(){
+  try{
+    if(!state._seedAplicado && !state.carregadores.length && !state.veiculos.length){
+      SEED_CARREGADORES.forEach(function(c){state.carregadores.push(Object.assign({id:uid(),criadoEm:new Date().toISOString(),clienteId:""},c))});
+      SEED_VEICULOS.forEach(function(v){state.veiculos.push(Object.assign({id:uid(),criadoEm:new Date().toISOString(),clienteId:""},v))});
+      state._seedAplicado=true;saveState();
+    }
+    renderAll();renderStepper();carregarDim();
+    if(window.innerWidth>=720)sidebar.classList.remove("collapsed");else sidebar.classList.add("collapsed");
+  }catch(e){console.error(e)}
+}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();
+
+})();
+</script>
+</body>
+</html>
